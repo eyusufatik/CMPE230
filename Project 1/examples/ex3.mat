@@ -1,0 +1,17 @@
+# simple pageranking
+# algorithm
+
+matrix   A[3,3]
+vector   x[3]
+vector   y[3]
+scalar   r
+scalar   i
+
+A={0.5 00.5000.50.510} x={111}
+for(i in 1:10:1) {
+    y = A*x
+    r = sqrt(tr(y-x)*(y-x)) print(r)
+    x=y
+}
+printsep()
+print(x)

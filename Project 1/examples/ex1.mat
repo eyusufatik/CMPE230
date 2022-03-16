@@ -1,0 +1,18 @@
+# this program computes fibonacci
+# numbers
+
+# variable definitions
+scalar i
+scalar n
+vector x[2]
+vector y[2]
+matrix A[2,2]
+matrix B[2,2]
+
+# statements
+n = 10 x={11} A={1110} B={1001} print(x)
+for(i in 1:n:1) {
+    B = A*B
+y = B*x
+    print(y[1])
+}
