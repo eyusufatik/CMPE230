@@ -19,14 +19,14 @@ int main(int argc, char *argv[]){
     ssize_t read;
     
     while ((read = getline(&line_buf, &line_buf_size, matFile)) != -1) {
-        printf("%s", line_buf);
+        // printf("%s", line_buf);
     }
 
-     /* Free the allocated line buffer */
+    //  Free the allocated line buffer
     free(line_buf);
     line_buf = NULL;
 
-    /* Close the file now that we are done with it */
+    //  Close the file now that we are done with it
     fclose(matFile);
     return 1;
 }
