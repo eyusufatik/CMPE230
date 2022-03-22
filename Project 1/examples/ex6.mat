@@ -1,8 +1,8 @@
 scalar i1
 scalar n2
 
-vector position
-vector pop
-vector bob
+vector pos[33]
+vector pop[112]
+vector bob[25]
 
-matrix A
+matrix A[2,3]
