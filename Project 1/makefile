@@ -1,4 +1,4 @@
-HEADERS = deneme.h
+HEADERS = vector.h
 
 default: matlang2c
 
