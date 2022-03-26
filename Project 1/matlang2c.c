@@ -154,8 +154,9 @@ char* make_matrix(char *line) {
     return ret_line;
 }
 
-char* convert_expression(char *expr){
-    return "not_imp";
+// sets out_expected type to 0 if type of expr is int, 1 if it's float
+char* convert_complex_expr(char *expr, int *out_expected_type){
+    return "not imp of complex expr";
 }
 
 char* make_assignment(char *line){
@@ -164,13 +165,12 @@ char* make_assignment(char *line){
         vector tokens = tokenize(line, " ={}\n\t");
         size_t index;
         vector float_test_tokens = tokenize(line, ". ={}\n\t");
-        char *caster = malloc(strlen("(float *)") + 1);
-        strcpy(caster, "(int *)");
+        char *caster;
 
         if(tokens.size != float_test_tokens.size){
-
-            // type should be float
-            strcpy(caster, "(float *)");
+            caster = "(float *)";
+        }else{
+            caster = "(int *)";
         }
 
         index = vec_str_find(vars.vector_names, tokens.elements[0]);
@@ -229,12 +229,12 @@ char* make_assignment(char *line){
 
                     char *value = tokens.elements[1 + i*cols + j];
                                     //({caster}({var_name}.elements[0]))[0] = 23..;
-                    char *op = malloc(1 + strlen(caster) + 1 +strlen(tokens.elements[0]) + 10 +strlen(i_str) + 4 + strlen(j_str)+4+strlen(value)+2);
+                    char *op = malloc(1 + strlen(caster) + 1 +strlen(tokens.elements[0]) + 9 +strlen(i_str) + 4 + strlen(j_str)+4+strlen(value)+2);
                     strcpy(op, "(");
                     strcat(op, caster);
                     strcat(op, "(");
                     strcat(op, tokens.elements[0]);
-                    strcat(op, ".elements)[");
+                    strcat(op, ".elements[");
                     strcat(op, i_str);
                     strcat(op, "]))[");
                     strcat(op, j_str);
@@ -260,13 +260,76 @@ char* make_assignment(char *line){
         }
     }else{
         // either basic scalar assignment or complex expressions involved
-        return "not imp of assig";
-    }
+        vector tokens = tokenize(line, " =\n\t");
 
-    return "not imp of assignment";
+        char *type;
+        size_t index;
+        if((index == vec_str_find(vars.scalar_names, tokens.elements[0])) != -1){
+            type = "scalar";
+        }else if(( index = vec_str_find(vars.vector_names, tokens.elements[0])) != -1){
+            type = "vector";
+        }else if((index = vec_str_find(vars.matrix_names, tokens.elements[0])) != -1){
+            type = "matrix";
+        }else{
+            return throw_error(); // variable doesn't exist
+        }
+
+        // must be basic scalar assignment
+        if(tokens.size == 2 && ((char **)tokens.elements)[1][0] >= 48 && ((char **)tokens.elements)[1][0] <= 57 && strcmp(type, "scalar") == 0){
+            int dot_count = 0;
+            // check if rhs is proper number
+            for(int i=0; i < strlen(tokens.elements[1]); i++){
+                if (((char **)tokens.elements)[1][i] < 48  || ((char **)tokens.elements)[1][i] > 57){
+                    if(((char **)tokens.elements)[1][i] == 46){
+                        dot_count++;
+                        if(dot_count > 1)
+                            return throw_error();
+                    }else{
+                        // non-numeric char
+                        return throw_error();
+                    }
+                }
+            }
+            char *caster;
+            if(dot_count == 1){
+                caster = "(float *)";
+            }else{
+                caster = "(int *)";
+            }
+
+            //  *{caster}{var_name} = {value};
+            char *line_in_c = malloc(1 + strlen(caster) + strlen(tokens.elements[0]) + 3 + strlen(tokens.elements[1]) + 2);
+            strcpy(line_in_c, "*");
+            strcat(line_in_c, caster);
+            strcat(line_in_c, tokens.elements[0]);
+            strcat(line_in_c, " = ");
+            strcat(line_in_c, tokens.elements[1]);
+            strcat(line_in_c, "\0;");
+            return line_in_c;
+        }else{
+            char *rhs = strstr(line, "=") + 1; // right hand side of assignment
+            int expected_type;
+            char *expr_in_c = convert_complex_expr(rhs, &expected_type);
+            // {var_name} = {expr_in_c};
+            char *line_in_c = malloc(strlen(tokens.elements[0]) + 3 + strlen(expr_in_c) + 2);
+            strcpy(line_in_c, tokens.elements[0]);
+            strcat(line_in_c, " = ");
+            strcat(line_in_c, expr_in_c);
+            strcat(line_in_c, ";\0");
+            free(rhs);
+            free(expr_in_c);
+            return line_in_c;
+        }
+    }
 }
 
+char* make_print_sep_func(){
+    return "----------";
+}
 
+char* make_print_func(char *line){
+    return "not imp of print";
+}
 
 char* convert_line(char *line){
     vector tokens = tokenize(line, " \n\t");
@@ -285,7 +348,12 @@ char* convert_line(char *line){
         return make_assignment(line);
     }else if(strncmp(line, "#", sizeof(char)) == 0){
        return "comment";
-    }else{
+    }else if(strstr(line, "print(")){
+        return make_print_func(line);
+    }else if(strstr(line, "printsep(")){
+        return make_print_sep_func();
+    }
+    else{
         return "not imp";
     }
 }
@@ -321,6 +389,10 @@ int main(int argc, char *argv[]){
     }
 
     for (int i = 0; i < lines.size; i++){
+        if(strstr(lines.elements[i], "for(")){
+            // buffer till end of for then convert?
+        }
+
         char *line_in_c = convert_line(lines.elements[i]);
 
         if(strcmp(line_in_c, "error") == 0){
