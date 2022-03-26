@@ -11,29 +11,27 @@
 /*
 KURALLAR
     <var_name> -> alfanumerik kurallar klasik c kuralları
-                    <var_name>[<int>]
-                    <var_name>[<int>,<int>]
+                    <var_name>[<num>]
+                    <var_name>[<num>,<num>]
     <operator> -> (* + -)
-    <int_list> -> <int> | <int> <int_list> // [ ] ları unutma
+    <num_list> -> <num> | <num> <num_list> // [ ] ları unutma
     DEFINITION KURALLARI
         scalar <var_name>
         vector <var_name>[<vector_length>]
         matrix <var_name>[<col_length>,<row_length>]
 
     ASSIGNMENT KURALLARI
-        assign scalar ->    <var_name> = <int>
-                                        <expression>
-        assign vector ->    <var_name> = <int_list>
-                                        <expression
-        assign matrix ->    <var_name> = <int_list>
-                                        <expression>
+        <assign-scalar> ->  scalar  <var_name> = (<num>|<expression>)
+        <assign-vector> ->  vector  <var_name> = (<num_list>|<expression>)
+        <assign-matrix> ->  matrix  <var_name> = (<num_list>|<expression)
     EXPRESSION KURALLARI
         expression  ->  <var_name>
-                        <int>
+                        <num>
                         <func <expression>>
-                        <int> <operator> <expression>
+                        <num> <operator> <expression>
                         <var_name> <operator> <expression>
                         <expression> <operator> <expression>
+                        (<expression>)
     FUNCTION KURALLAR
         <func>  -> <tr> | <sqrt> | <choose> | <print> | <print_sep>
         <tr>    ->  tr(<expression>)
@@ -159,7 +157,31 @@ char* convert_complex_expr(char *expr, int *out_expected_type){
     return "not imp of complex expr";
 }
 
+bool proper_number_check(char *num_str, char **caster){
+    int dot_count = 0;
+    // check if rhs is proper number
+    for(int i=0; i < strlen(num_str); i++){
+        if (num_str[i] < 48  || num_str[i] > 57){
+            if(num_str[i] == 46){
+                dot_count++;
+                if(dot_count > 1)
+                    return false;
+            }else{
+                // non-numeric char
+                return false;
+            }
+        }
+    }
+    if(dot_count == 1){
+        *caster = "(float *)";
+    }else{
+        *caster = "(int *)";
+    }
+    return true;
+}
+
 char* make_assignment(char *line){
+    
     if(strchr(strdup(line), '{') != NULL){
         // can only be matrix or vector init.
         vector tokens = tokenize(line, " ={}\n\t");
@@ -259,12 +281,12 @@ char* make_assignment(char *line){
             return throw_error();
         }
     }else{
-        // either basic scalar assignment or complex expressions involved
-        vector tokens = tokenize(line, " =\n\t");
-
+        // either basic scalar assignment, vector/matrix change element or complex expressions involved
+        vector tokens = tokenize(line, " =[,]\n\t");
+    
         char *type;
         size_t index;
-        if((index == vec_str_find(vars.scalar_names, tokens.elements[0])) != -1){
+        if((index = vec_str_find(vars.scalar_names, tokens.elements[0])) != -1){
             type = "scalar";
         }else if(( index = vec_str_find(vars.vector_names, tokens.elements[0])) != -1){
             type = "vector";
@@ -273,32 +295,57 @@ char* make_assignment(char *line){
         }else{
             return throw_error(); // variable doesn't exist
         }
-
-        // must be basic scalar assignment
-        if(tokens.size == 2 && ((char **)tokens.elements)[1][0] >= 48 && ((char **)tokens.elements)[1][0] <= 57 && strcmp(type, "scalar") == 0){
-            int dot_count = 0;
-            // check if rhs is proper number
-            for(int i=0; i < strlen(tokens.elements[1]); i++){
-                if (((char **)tokens.elements)[1][i] < 48  || ((char **)tokens.elements)[1][i] > 57){
-                    if(((char **)tokens.elements)[1][i] == 46){
-                        dot_count++;
-                        if(dot_count > 1)
-                            return throw_error();
-                    }else{
-                        // non-numeric char
-                        return throw_error();
-                    }
-                }
-            }
+        
+        // TODO: y[2] = 5
+        if(tokens.size == 3 && strcmp(type, "vector") == 0){
             char *caster;
-            if(dot_count == 1){
-                caster = "(float *)";
-            }else{
-                caster = "(int *)";
+            if(proper_number_check(tokens.elements[2], &caster) == false){
+                free(caster);
+                return throw_error();
             }
-
+            //  ({caster}{var_name}.elements)[{index}] = {value};
+            char *line_in_c = malloc(1 + strlen(caster) + strlen(tokens.elements[0]) + 11 + strlen(tokens.elements[1]) + 4 + strlen(tokens.elements[2]) + 2);
+            strcpy(line_in_c, "(");
+            strcat(line_in_c, caster);
+            strcat(line_in_c, tokens.elements[0]);
+            strcat(line_in_c, ".elements[");
+            strcat(line_in_c, tokens.elements[1]);
+            strcat(line_in_c, "] = ");
+            strcat(line_in_c, tokens.elements[2]);
+            strcat(line_in_c, ";\0");
+            return line_in_c;
+            // type might change
+        }else if(tokens.size == 4 && strcmp(type, "matrix") == 0){
+            char *caster;
+            if(proper_number_check(tokens.elements[3], &caster) == false){
+                free(caster);
+                return throw_error();
+            }
+            // ({caster}({var_name}.elements[{i}]))[{j}] = 1.23;
+            char *line_in_c = malloc(1 + strlen(caster) + 1 + strlen(tokens.elements[0]) + 10 + strlen(tokens.elements[1]) + 4 + strlen(tokens.elements[2]) + 4 + strlen(tokens.elements[3]) + 2);
+            strcpy(line_in_c, "(");
+            strcat(line_in_c, caster);
+            strcat(line_in_c, "(");
+            strcat(line_in_c, tokens.elements[0]);
+            strcat(line_in_c, ".elements[");
+            strcat(line_in_c, tokens.elements[1]);
+            strcat(line_in_c, "]))[");
+            strcat(line_in_c, tokens.elements[2]);
+            strcat(line_in_c, "] = ");
+            strcat(line_in_c, tokens.elements[3]);
+            strcat(line_in_c, ";\0");
+            return line_in_c;
+            // type migth change
+        }else if(tokens.size == 2 && strcmp(type, "scalar") == 0){
+            
+            char *caster;
+            if(proper_number_check(tokens.elements[1], &caster) == false){
+                free(caster);
+                return throw_error();
+            }
             //  *{caster}{var_name} = {value};
             char *line_in_c = malloc(1 + strlen(caster) + strlen(tokens.elements[0]) + 3 + strlen(tokens.elements[1]) + 2);
+            
             strcpy(line_in_c, "*");
             strcat(line_in_c, caster);
             strcat(line_in_c, tokens.elements[0]);
