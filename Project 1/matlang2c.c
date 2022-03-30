@@ -65,6 +65,16 @@ char* throw_error(){
     return "error";
 }
 
+int type_to_int(char *type){
+    if(strcmp(type, "matrix") == 0){
+        return 2;
+    }else if(strcmp(type, "vector") == 0){
+        return 1;
+    }else if(strcmp(type, "scalar") == 0){
+        return 0;
+    }
+}
+
 int countChars( char* s, char c )
 {
     return *s == '\0'
@@ -409,8 +419,64 @@ char* make_matrix(char *line) {
     return ret_line;
 }
 
-// sets out_expected type to 0 if type of expr is int, 1 if it's float
-char* convert_complex_expr(char *expr){
+char *get_func_for_arithmetic_op(int type_left, int type_right, char operator, int *ret_type, bool *in_reverse){
+    if(type_left == 2 && type_right ==2){
+            *ret_type = 2;
+            if (operator == '*')
+                return "m_m_mul";
+            else if (operator == '+')
+                return "m_m_sum";
+            else
+                return "m_m_min";
+    }else if((type_left == 2 && type_right == 1) ||
+                    (type_left == 1 && type_right == 2)){
+        *in_reverse = type_left == 1;
+        if(in_reverse)
+            *ret_type = 2;
+        else
+            *ret_type = 1;
+        
+        if (operator == '*')
+            return "m_v_mul";
+        else if (operator == '+')
+            return "m_v_sum";
+        else
+            return "m_v_min";
+        
+    }else if(type_left == 1 && type_right == 1){
+        *ret_type = 1;
+        if (operator == '*')
+            return throw_error();
+        else if (operator == '+')
+            return "v_v_sum";
+        else
+            return "v_v_min";
+    }else if(type_left== 0 && type_right == 0){
+        *ret_type = 0;
+        if (operator == '*')
+            return "s_s_mul";
+        else if (operator == '+')
+            return "s_s_sum";
+        else
+            return "s_s_min";
+    }else if(operator == '*' && ((type_left == 2 && type_right == 0) ||
+                                    (type_left == 0 && type_right == 2))){
+        *in_reverse = type_left == 0;
+        *ret_type = 2;
+        return "m_s_mul";
+    }else if(operator == '*' && ((type_left == 1 && type_right == 0) ||
+                                    (type_left == 0 && type_right == 1))){
+        *in_reverse = type_left == 0;
+        *ret_type = 1;
+        return "v_s_mul";
+    }else{
+        *ret_type = -1;
+        return "";
+    }
+}
+
+// out ret type: 0 scalar, 1 vector, 2 matrix
+char* convert_complex_expr(char *expr, int *ret_type){
     trim(expr);
     printf("Converting: %s\n", expr);
 
@@ -449,47 +515,15 @@ char* convert_complex_expr(char *expr){
         // either m_m_sum m_m_mul m_m_min or v s
         char *func_name = malloc(8);
         bool in_reverse = false;
-        if(strcmp(type_left, "matrix") == 0 && strcmp(type_right, "matrix") == 0){
-            if (operator == '*')
-                strcpy(func_name, "m_m_mul");
-            else if (operator == '+')
-                strcpy(func_name, "m_m_sum");
-            else
-                strcpy(func_name, "m_m_min");
-        }else if((strcmp(type_left, "matrix") == 0 && strcmp(type_right, "vector") == 0) ||
-                        (strcmp(type_left, "vector") == 0 && strcmp(type_right, "matrix") == 0)){
-            if (operator == '*')
-                strcpy(func_name, "m_v_mul");
-            else if (operator == '+')
-                strcpy(func_name, "m_v_sum");
-            else
-                strcpy(func_name, "m_v_min");
-            in_reverse = (strcmp(type_left, "vector") == 0);
-        }else if(strcmp(type_left, "vector") == 0 && strcmp(type_right, "vector") == 0){
-            if (operator == '*')
-                return throw_error();
-            else if (operator == '+')
-                strcpy(func_name, "v_v_sum");
-            else
-                strcpy(func_name, "v_v_min");
-        }else if(strcmp(type_left, "scalar") == 0 && strcmp(type_right, "scalar") == 0){
-            if (operator == '*')
-                strcpy(func_name, "s_s_mul");
-            else if (operator == '+')
-                strcpy(func_name, "s_s_sum");
-            else
-                strcpy(func_name, "s_s_min");
-        }else if(operator == '*' && ((strcmp(type_left, "matrix") == 0 && strcmp(type_right, "scalar") == 0) ||
-                                        (strcmp(type_left, "scalar") == 0 && strcmp(type_right, "matrix") == 0))){
-            strcpy(func_name, "m_s_mul");
-            in_reverse = (strcmp(type_left, "scalar") == 0);
-        }else if(operator == '*' && ((strcmp(type_left, "vector") == 0 && strcmp(type_right, "scalar") == 0) ||
-                                        (strcmp(type_left, "scalar") == 0 && strcmp(type_right, "vector") == 0))){
-            strcpy(func_name, "v_s_mul");
-            in_reverse = (strcmp(type_left, "scalar") == 0);
-        }else{
+        int out_type = -1;
+        int type_left_int = type_to_int(type_left);
+        int type_right_int = type_to_int(type_right);
+        strcpy(func_name, get_func_for_arithmetic_op(type_left_int, type_right_int, operator, &out_type, &in_reverse));
+        *ret_type = out_type;
+        if(out_type == -1){
             return throw_error();
         }
+        
 
         // {func_name}({var1}, {var2})
         char *ret = malloc(strlen(func_name) + 1 + strlen(tokens.elements[0]) + 2 + strlen(tokens.elements[1]) + 2);
@@ -506,7 +540,6 @@ char* convert_complex_expr(char *expr){
         }
         strcat(ret, ")");
         strcat(ret, "\0");
-        printf("combined %s\n", ret);
         return ret;
     }else if(match_indexed_matrix(expr)){
         vector tokens = tokenize(expr, " [,]");
@@ -518,6 +551,7 @@ char* convert_complex_expr(char *expr){
         strcat(ret, "][");
         strcat(ret, tokens.elements[2]);
         strcat(ret, "]");
+        *ret_type = 0;
         return ret;
     }else if(match_indexed_vector(expr)){
         vector tokens = tokenize(expr, " [,]");
@@ -527,10 +561,15 @@ char* convert_complex_expr(char *expr){
         strcat(ret, ".elements[");
         strcat(ret, tokens.elements[1]);
         strcat(ret, "]");
+        *ret_type = 0;
         return ret;
     }else if(match_var(expr)){
+        int dummy = 0;
+        char *type = get_var_type_and_index(expr, &dummy);
+        *ret_type = type_to_int(type);
         return expr;
     }else if(match_num(expr)){
+        *ret_type = 0;
         return expr;
     }else if(match_expr_op_expr(expr)){
         int level = 0;
@@ -546,20 +585,25 @@ char* convert_complex_expr(char *expr){
                 strncpy(left, expr, i);
                 strncpy(right, expr+i+1, strlen(expr)-i);
 
+                int left_type = -1;
                 char *left_in_c = malloc(255);
-                strcpy(left_in_c, convert_complex_expr(left));
+                strcpy(left_in_c, convert_complex_expr(left, &left_type));
+                int right_type = -1;
                 char *right_in_c = malloc(255);
-                strcpy(right_in_c, convert_complex_expr(right));
-                char *ret = malloc(strlen(left_in_c) + 3 + strlen(right_in_c));
-                strcpy(ret, left_in_c);
-                strcat(ret, " ");
-                char fix[2];
-                fix[0] = c;
-                fix[1] = "\0";
-                strncat(ret, fix,1);
-                strcat(ret, " ");
-                printf("%s", right_in_c);
+                strcpy(right_in_c, convert_complex_expr(right, &right_type));
+                int out_type = -1;
+                bool in_reverse = false;
+                char *func_name = malloc(8);
+                strcpy(func_name, get_func_for_arithmetic_op(left_type, right_type, c, &out_type, &in_reverse));
+                printf("func name: %s\n", get_func_for_arithmetic_op(left_type, right_type, c, &out_type, &in_reverse));
+                *ret_type = out_type;
+                char *ret = malloc(8 + 1 + strlen(left_in_c) + 2 + strlen(right_in_c) + 2);
+                strcpy(ret, func_name);
+                strcat(ret, "(");
+                strcat(ret, left_in_c);
+                strcat(ret, ", ");
                 strcat(ret, right_in_c);
+                strcat(ret, ")");
                 // printf("%s", ret);
                 // free(left);
                 // free(right);
@@ -569,7 +613,9 @@ char* convert_complex_expr(char *expr){
     }else if(match_expr_in_paran(expr)){
         char *exprr = malloc(strlen(expr)-2);
         strncpy(exprr, expr+1, strlen(expr)-2);
-        char *expr_in_c = convert_complex_expr(exprr);
+        int inside_type = 0;
+        char *expr_in_c = convert_complex_expr(exprr, &inside_type);
+        *ret_type = inside_type;
         char *ret = malloc(strlen(expr_in_c) + 2);
         strcpy(ret, "(");
         strcat(ret, expr_in_c);
@@ -585,7 +631,11 @@ char* convert_complex_expr(char *expr){
 
         char *inside = malloc(last_index-first_index+1);
         strncpy(inside, first+1, last-first-1);
-        char *inside_in_c = convert_complex_expr(inside);
+        int inside_type = 0;
+        char *inside_in_c = convert_complex_expr(inside, &inside_type);
+        *ret_type = inside_type;
+        if(inside_type == 1 && strncmp(expr, "tr(", 3) == 0)
+            *ret_type = 2;
         char *ret = malloc(first - expr + strlen(inside_in_c) + 1);
         strncpy(ret, expr, first-expr);
         strcat(ret, "(");
@@ -704,8 +754,15 @@ char* make_assignment(char *line){
         size_t size = rhs-line-1;
         char *lhs = malloc(size);
         strncpy(lhs, line, size);
-        char *lhs_in_c = convert_complex_expr(lhs);
-        char *expr_in_c = convert_complex_expr(rhs);
+        int left_type = -1;
+        char *lhs_in_c = convert_complex_expr(lhs, &left_type);
+        int right_type = -1;
+        char *expr_in_c = convert_complex_expr(rhs, &right_type);
+        printf("%s \n %d %d", line, left_type, right_type);
+        // if (right_type != left_type){
+        //     printf("cannot assing, expression doesnt return variable's type\n");
+        //     return throw_error();
+        // }
         // {var_name} = {expr_in_c};
         char *line_in_c = malloc(strlen(lhs_in_c) + 3 + strlen(expr_in_c) + 2);
         strcpy(line_in_c, lhs_in_c);
@@ -729,11 +786,16 @@ char* make_print_func(char *line){
     char *expr = malloc(end-start+1+1);
     memcpy(expr, line+start, end-start+1);
     strcat(expr, "\0");
-    char *expr_in_c = convert_complex_expr(expr);
+    int type = -1;
+    char *expr_in_c = convert_complex_expr(expr, &type);
     // my_print({expr_in_c});
-    char *line_in_c = malloc(9 + strlen(expr)+3);
-
-    strcpy(line_in_c, "my_print(");
+    char *line_in_c = malloc(10 + strlen(expr)+3);
+    if(type == 0)
+        strcpy(line_in_c, "my_print_s(");
+    else if(type == 1)
+        strcpy(line_in_c, "my_print_v(");
+    else if(type == 2)
+        strcpy(line_in_c, "my_print_m(");
     strcat(line_in_c, expr_in_c);
     strcat(line_in_c, ");\0");
     // free(expr);
@@ -766,22 +828,32 @@ char *make_for(char *line){
         char *expr1 = malloc(expr1_size);
         strncpy(expr1, in+3, expr1_size);
         trim(expr1);
-        char *expr1_in_c = convert_complex_expr(expr1);
+        int type = -1;
+        char *expr1_in_c = convert_complex_expr(expr1, &type);
+        
+        if(type != 0)
+            return throw_error();
 
         char *expr2_close = strchr(expr1_close+1, ':');
         size_t expr2_size = expr2_close - expr1_close - 1;
         char *expr2 = malloc(expr2_size);
         strncpy(expr2, expr1_close + 1, expr2_size);
         trim(expr2);
-        char *expr2_in_c = convert_complex_expr(expr2);
+        char *expr2_in_c = convert_complex_expr(expr2, &type);
+
+        if(type != 0)
+            return throw_error();
 
         char *expr3_close = strchr(expr2_close+1, ')');
         size_t expr3_size = expr3_close - expr2_close - 1;
         char *expr3 = malloc(expr3_size);
         strncpy(expr3, expr2_close + 1, expr3_size);
         trim(expr3);
-        char *expr3_in_c = convert_complex_expr(expr3);
+        char *expr3_in_c = convert_complex_expr(expr3, &type);
 
+        if(type != 0)
+            return throw_error();
+        
         // int {var_name} = {exp1};
         char *for_var_part = malloc(strlen(var_name) + 3 + strlen(expr1_in_c) + 2);
         strcpy(for_var_part, var_name);
@@ -852,42 +924,61 @@ char *make_for(char *line){
         char *expr1 = malloc(expr1_size);
         strncpy(expr1, in+3, expr1_size);
         trim(expr1);
-        char *expr1_in_c = convert_complex_expr(expr1);
+        int type = -1;
+        char *expr1_in_c = convert_complex_expr(expr1, &type);
+
+        if(type != 0)
+            return throw_error();
 
         char *expr2_close = strchr(expr1_close+1, ':');
         size_t expr2_size = expr2_close - expr1_close - 1;
         char *expr2 = malloc(expr2_size);
         strncpy(expr2, expr1_close + 1, expr2_size);
         trim(expr2);
-        char *expr2_in_c = convert_complex_expr(expr2);
+        char *expr2_in_c = convert_complex_expr(expr2, &type);
 
+        if(type != 0)
+            return throw_error();
+        
         char *expr3_close = strchr(expr2_close+1, ',');
         size_t expr3_size = expr3_close - expr2_close - 1;
         char *expr3 = malloc(expr3_size);
         strncpy(expr3, expr2_close + 1, expr3_size);
         trim(expr3);
-        char *expr3_in_c = convert_complex_expr(expr3);
+        char *expr3_in_c = convert_complex_expr(expr3, &type);
+
+        if(type != 0)
+            return throw_error();
 
         char *expr4_close = strchr(expr3_close+1, ':');
         size_t expr4_size = expr4_close - expr3_close - 1;
         char *expr4 = malloc(expr4_size);
         strncpy(expr4, expr3_close + 1, expr4_size);
         trim(expr4);
-        char *expr4_in_c = convert_complex_expr(expr4);
+        char *expr4_in_c = convert_complex_expr(expr4, &type);
 
+        if(type != 0)
+            return throw_error();
+        
         char *expr5_close = strchr(expr4_close+1, ':');
         size_t expr5_size = expr5_close - expr4_close - 1;
         char *expr5 = malloc(expr5_size);
         strncpy(expr5, expr4_close + 1, expr5_size);
         trim(expr5);
-        char *expr5_in_c = convert_complex_expr(expr5);
+        char *expr5_in_c = convert_complex_expr(expr5, &type);
 
+        if(type != 0)
+            return throw_error();
+        
         char *expr6_close = strchr(expr5_close+1, ')');
         size_t expr6_size = expr6_close - expr5_close - 1;
         char *expr6 = malloc(expr6_size);
         strncpy(expr6, expr5_close + 1, expr6_size);
         trim(expr6);
-        char *expr6_in_c = convert_complex_expr(expr6);
+        char *expr6_in_c = convert_complex_expr(expr6, &type);
+
+        if(type != 0)
+            return throw_error();
 
          // int {var_name} = {exp1};
         char *for_var_part = malloc(strlen(var1) + 3 + strlen(expr1_in_c) + 2);
