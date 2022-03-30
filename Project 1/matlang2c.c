@@ -65,6 +65,13 @@ char* throw_error(){
     return "error";
 }
 
+int countChars( char* s, char c )
+{
+    return *s == '\0'
+              ? 0
+              : countChars( s + 1, c ) + (*s == c);
+}
+
 char *trim(char *str){
     size_t len = 0;
     char *frontp = str;
@@ -105,7 +112,7 @@ char *trim(char *str){
 }
 
 bool prefix(const char *str, const char *pre){
-    return strncmp(pre, str, strlen(pre)) == 0;
+    return strncmp(str, pre, strlen(pre)) == 0;
 }
 
 vector tokenize(char *str, char *delimeter){
@@ -202,106 +209,13 @@ bool match_indexed_vector(char *expr){
     }
 }
 
-bool match_m_m_mult(char *expr){
-    int dummy = 0;
-    vector tokens = tokenize(expr, " *\n\t");
-    if (tokens.size == 2){
-        if(strcmp("matrix", get_var_type_and_index(tokens.elements[0], &dummy)) == 0 && strcmp("matrix", get_var_type_and_index(tokens.elements[1], &dummy)) == 0){
-            return true;
-        }else{
-            return false;
-        }
-    }else{
-        return false;
-    }
-}
-
-bool match_m_m_sum(char *expr){
-    int dummy = 0;
-    vector tokens = tokenize(expr, " +\n\t");
-    if (tokens.size == 2){
-        if(strcmp("matrix", get_var_type_and_index(tokens.elements[0], &dummy)) == 0 && strcmp("matrix", get_var_type_and_index(tokens.elements[1], &dummy)) == 0){
-            return true;
-        }else{
-            return false;
-        }
-    }else{
-        return false;
-    }
-}
-
-bool match_m_v_sum(char *expr){
-    int dummy = 0;
-    vector tokens = tokenize(expr, " +\n\t");
-    if (tokens.size == 2){
-        if((strcmp("matrix", get_var_type_and_index(tokens.elements[0], &dummy)) == 0 && strcmp("vector", get_var_type_and_index(tokens.elements[1], &dummy)) == 0) || (strcmp("vector", get_var_type_and_index(tokens.elements[0], &dummy)) == 0 && strcmp("matrix", get_var_type_and_index(tokens.elements[1], &dummy)) == 0)){
-            return true;
-        }else{
-            return false;
-        }
-    }else{
-        return false;
-    }
-}
-
-bool match_m_v_mult(char *expr){
-    int dummy = 0;
-    vector tokens = tokenize(expr, " *\n\t");
-    if (tokens.size == 2){
-        if((strcmp("matrix", get_var_type_and_index(tokens.elements[0], &dummy)) == 0 && strcmp("vector", get_var_type_and_index(tokens.elements[1], &dummy)) == 0) || (strcmp("vector", get_var_type_and_index(tokens.elements[0], &dummy)) == 0 && strcmp("matrix", get_var_type_and_index(tokens.elements[1], &dummy)) == 0)){
-            return true;
-        }else{
-            return false;
-        }
-    }else{
-        return false;
-    }
-}
-
-bool match_m_s_mult(char *expr){
-    int dummy = 0;
-    vector tokens = tokenize(expr, " *\n\t");
-    if (tokens.size == 2){
-        if((strcmp("matrix", get_var_type_and_index(tokens.elements[0], &dummy)) == 0 && strcmp("scalar", get_var_type_and_index(tokens.elements[1], &dummy)) == 0) || (strcmp("scalar", get_var_type_and_index(tokens.elements[0], &dummy)) == 0 && strcmp("matrix", get_var_type_and_index(tokens.elements[1], &dummy)) == 0)){
-            return true;
-        }else{
-            return false;
-        }
-    }else{
-        return false;
-    }
-}
-
-bool match_v_v_sum(char *expr){
-    int dummy = 0;
-    vector tokens = tokenize(expr, " +\n\t");
-    if (tokens.size == 2){
-        if((strcmp("vector", get_var_type_and_index(tokens.elements[0], &dummy)) == 0 && strcmp("vector", get_var_type_and_index(tokens.elements[1], &dummy)) == 0) || (strcmp("vector", get_var_type_and_index(tokens.elements[0], &dummy)) == 0 && strcmp("vector", get_var_type_and_index(tokens.elements[1], &dummy)) == 0)){
-            return true;
-        }else{
-            return false;
-        }
-    }else{
-        return false;
-    }
-}
-
-bool match_v_s_mult(char *expr){
-    int dummy = 0;
-    vector tokens = tokenize(expr, " +\n\t");
-    if (tokens.size == 2){
-        if((strcmp("scalar", get_var_type_and_index(tokens.elements[0], &dummy)) == 0 && strcmp("scalar", get_var_type_and_index(tokens.elements[1], &dummy)) == 0) || (strcmp("scalar", get_var_type_and_index(tokens.elements[0], &dummy)) == 0 && strcmp("scalar", get_var_type_and_index(tokens.elements[1], &dummy)) == 0)){
-            return true;
-        }else{
-            return false;
-        }
-    }else{
-        return false;
-    }
-}
-
 bool match_var(char *expr){
-    int index = 0;
+    int index = -1;
+    if(strcmp(expr, "xy2") == 0){
+        for(int i = 0; i < vars.vector_names.size; i++){
+            printf("%s\n", vars.vector_names.elements[i]);
+        }
+    }
     get_var_type_and_index(expr, &index);
     return index != -1;
 }
@@ -313,14 +227,17 @@ bool match_num(char *expr){
 bool match_func(char *expr){
     if(prefix(expr, "tr(") || prefix(expr, "sqrt(")){
         int level = 0;
+        bool enteredOnce = false;
         for (int i = 0; i < strlen(expr); i++){
             char c = expr[i];
-            if(c == '(')
-                level++;
-            else if(level == ')')
-                level++;
-            
-            if(level == 0 && i != strlen(expr)-1)
+            if(c == '('){
+              level++;
+              enteredOnce = true;
+            }
+            else if(c == ')'){
+              level--;
+            }
+            if(enteredOnce && level == 0 && i != strlen(expr)-1)
                 return false;
         }
         return true;
@@ -336,7 +253,7 @@ bool match_choose(char *expr){
             char c = expr[i];
             if(c == '(')
                 level++;
-            else if(level == ')')
+            else if(c == ')')
                 level++;
             
             if(level == 0 && i != strlen(expr)-1)
@@ -355,7 +272,7 @@ bool match_expr_in_paran(char *expr){
             char c = expr[i];
             if(c == '(')
                 level++;
-            else if(level == ')')
+            else if(c == ')')
                 level++;
             
             if(level == 0 && i != strlen(expr)-1)
@@ -381,6 +298,32 @@ bool match_expr_op_expr(char *expr){
     }
     return false;
     
+}
+
+bool match_binary_arithmetic_expr(char *expr){
+    if(countChars(expr, '*') + countChars(expr, '+') + countChars(expr, '-') > 1) // throw error maybe?
+        return false;
+
+    vector tokens = tokenize(expr, " *+-\n\t");
+    if(tokens.size != 2)
+        return false;
+
+    return proper_varname_check(tokens.elements[0]) && proper_varname_check(tokens.elements[1]);
+    // size_t index_left = -1;
+    // size_t index_right = -1;
+    // char *type_left = get_var_type_and_index(tokens.elements[0], &index_left);
+    // char *type_right = get_var_type_and_index(tokens.elements[1], &index_right);
+
+    // if(index_left == -1 || index_right == -1)
+    //     return false;
+    
+    // m (* + -) m
+    // m (* + -) v
+    // v (* + -) m
+    // v (+ -) v
+    // m * s
+    // v * s
+
 }
 
 char* make_scalar(char *line) {
@@ -414,7 +357,6 @@ char* make_vector(char *line) {
     }
 
     char *var_name = var_tokens.elements[1];
-
     if(!proper_varname_check(var_name)){
         return throw_error();
     }
@@ -471,169 +413,97 @@ char* make_matrix(char *line) {
 char* convert_complex_expr(char *expr){
     trim(expr);
     printf("Converting: %s\n", expr);
-    if(match_m_m_mult(expr)){
-        vector tokens = tokenize(expr, " *");
-        int index1 = 0;
-        int index2 = 0;
-        get_var_type_and_index(tokens.elements[0], &index1);
-        get_var_type_and_index(tokens.elements[1], &index2);
+    
+    if(match_binary_arithmetic_expr(expr)){
+        printf("expression: %s", expr);
+        vector tokens = tokenize(expr, " *+-\n\t");
 
-        //check if dimensions match
-        if(((int**)vars.matrix_dimensions.elements)[index1][1] != ((int**)vars.matrix_dimensions.elements)[index2][0]){
+        size_t index_left = -1;
+        size_t index_right = -1;
+        char *type_left = get_var_type_and_index(tokens.elements[0], &index_left);
+        char *type_right = get_var_type_and_index(tokens.elements[1], &index_right);
+
+        if(index_left == -1 || index_right == -1){
             return throw_error();
         }
 
-        // m_m_mult({var1}, {var2})
-        char *ret = malloc(9 + strlen(tokens.elements[0]) + 2 + strlen(tokens.elements[1]) + 2);
-        strcpy(ret, "m_m_mult(");
-        strcat(ret, tokens.elements[0]);
-        strcat(ret, ", ");
-        strcat(ret, tokens.elements[1]);
-        strcat(ret, ")\0");
-        return ret;
-    }else if(match_m_v_mult(expr)){
-        vector tokens = tokenize(expr, " *");
-        int index1 = 0;
-        int index2 = 0;
-        char *type_left = get_var_type_and_index(tokens.elements[0], &index1);
-        get_var_type_and_index(tokens.elements[1], &index2);
+        char operator;
 
-        // m_v_mult({matrixvar}, {vectorvar})
-        char *ret = malloc(9 + strlen(tokens.elements[0]) + 2 + strlen(tokens.elements[1]) + 2);
-        strcpy(ret, "m_v_mult(");
-        if(strcmp(type_left, "matrix") == 0){
-            // matrix * vector
-            if(((int**)vars.matrix_dimensions.elements)[index1][1] != ((int**)vars.vector_dimensions.elements)[index2][0]){
-                return throw_error();
-            }
-            strcat(ret, tokens.elements[0]);
-            strcat(ret, ", ");
-            strcat(ret, tokens.elements[1]);
-        }else{
-            // vector * matrix
-            if(1 != ((int**)vars.vector_dimensions.elements)[index2][0]){
-                return throw_error();
-            }
-            strcat(ret, tokens.elements[1]);
-            strcat(ret, ", ");
-            strcat(ret, tokens.elements[0]);
-        }
-        strcat(ret, ")\0");
-        return ret;
-    }else if(match_m_s_mult(expr)){
-        vector tokens = tokenize(expr, " *");
-        int index1 = 0;
-        int index2 = 0;
-        char *type_left = get_var_type_and_index(tokens.elements[0], &index1);
-        get_var_type_and_index(tokens.elements[1], &index2);
-        // m_s_mult({matrix}, {scalar})
-        char *ret = malloc(9 + strlen(tokens.elements[0]) + 3 +strlen(tokens.elements[1]) + 2);
-        strcpy(ret, "m_s_mult(");
-        if(strcmp(type_left, "matrix") == 0){
-            // matrix * scalar
-            strcat(ret, tokens.elements[0]);
-            strcat(ret, ", ");
-            strcat(ret, tokens.elements[1]);
-            
-        }else{
-            // scalar * matrix
-            strcat(ret, tokens.elements[1]);
-            strcat(ret, ", ");
-            strcat(ret, tokens.elements[0]);
-        }
-        strcat(ret, ")\0");
-        return ret;
-    }else if(match_v_s_mult(expr)){
-        vector tokens = tokenize(expr, " *");
-        int index1 = 0;
-        int index2 = 0;
-        char *type_left = get_var_type_and_index(tokens.elements[0], &index1);
-        get_var_type_and_index(tokens.elements[1], &index2);
-        // v_s_mult({matrix}, {scalar})
-        char *ret = malloc(9 + strlen(tokens.elements[0]) + 3 +strlen(tokens.elements[1]) + 2);
-        strcpy(ret, "v_s_mult(");
-        if(strcmp(type_left, "vector") == 0){
-            // matrix * scalar
-            strcat(ret, tokens.elements[0]);
-            strcat(ret, ", ");
-            strcat(ret, tokens.elements[1]);
-            
-        }else{
-            // scalar * matrix
-            strcat(ret, tokens.elements[1]);
-            strcat(ret, ", ");
-            strcat(ret, tokens.elements[0]);
-        }
-        strcat(ret, ")\0");
-        return ret;
-    }else if(match_m_m_sum(expr)){
-        vector tokens = tokenize(expr, " +");
-        int index1 = 0;
-        int index2 = 0;
-        get_var_type_and_index(tokens.elements[0], &index1);
-        get_var_type_and_index(tokens.elements[1], &index2);
+        if(strchr(expr, '*'))
+            operator = '*';
+        else if(strchr(expr, '+'))
+            operator = '+';
+        else
+            operator = '-';
+        
+        // olabilecekler alttakiler
+        // m (* + -) m
+        // m (* + -) v
+        // v (* + -) m
+        // v (+ -) v
+        // m * s
+        // s * m
+        // v * s
+        // v * s
+        // s (* + -) s
 
-        //check if dimensions match
-        if((((int**)vars.matrix_dimensions.elements)[index1][0] != ((int**)vars.matrix_dimensions.elements)[index2][0]) || (((int**)vars.matrix_dimensions.elements)[index1][1] != ((int**)vars.matrix_dimensions.elements)[index2][1])){
+        // either m_m_sum m_m_mul m_m_min or v s
+        char *func_name = malloc(8);
+        bool in_reverse = false;
+        if(strcmp(type_left, "matrix") == 0 && strcmp(type_right, "matrix") == 0){
+            if (operator == '*')
+                strcpy(func_name, "m_m_mul");
+            else if (operator == '+')
+                strcpy(func_name, "m_m_sum");
+            else
+                strcpy(func_name, "m_m_min");
+        }else if((strcmp(type_left, "matrix") == 0 && strcmp(type_right, "vector") == 0) || 
+                        (strcmp(type_left, "vector") == 0 && strcmp(type_right, "matrix") == 0)){
+            if (operator == '*')
+                strcpy(func_name, "m_v_mul");
+            else if (operator == '+')
+                strcpy(func_name, "m_v_sum");
+            else
+                strcpy(func_name, "m_v_min");
+            in_reverse = (strcmp(type_left, "matrix") == 0);
+        }else if(strcmp(type_left, "vector") == 0 && strcmp(type_right, "vector") == 0){
+            if (operator == '*')
+                return throw_error();
+            else if (operator == '+')
+                strcpy(func_name, "v_v_sum");
+            else
+                strcpy(func_name, "v_v_min");
+        }else if(strcmp(type_left, "scalar") == 0 && strcmp(type_right, "scalar") == 0){
+            if (operator == '*')
+                strcpy(func_name, "s_s_mul");
+            else if (operator == '+')
+                strcpy(func_name, "s_s_sum");
+            else
+                strcpy(func_name, "s_s_min");
+        }else if(operator == '*' && ((strcmp(type_left, "matrix") == 0 && strcmp(type_right, "scalar") == 0) || 
+                                        (strcmp(type_left, "scalar") == 0 && strcmp(type_right, "matrix") == 0))){
+            strcpy(func_name, "m_s_mul");
+        }else if(operator == '*' && ((strcmp(type_left, "vector") == 0 && strcmp(type_right, "scalar") == 0) || 
+                                        (strcmp(type_left, "scalar") == 0 && strcmp(type_right, "vector") == 0))){
+            strcpy(func_name, "v_s_mul");
+        }else{
             return throw_error();
         }
-
-        // m_m_sum({var1}, {var2})
-        char *ret = malloc(1 + strlen(tokens.elements[0]) + 2 + strlen(tokens.elements[1]) + 2);
-        strcpy(ret, "m_m_sum(");
-        strcat(ret, tokens.elements[0]);
-        strcat(ret, ", ");
-        strcat(ret, tokens.elements[1]);
-        strcat(ret, ")\0");
-        return ret;
-    }else if(match_m_v_sum(expr)){
-        vector tokens = tokenize(expr, " +");
-        int index1 = 0;
-        int index2 = 0;
-        char *type_left = get_var_type_and_index(tokens.elements[0], &index1);
-        get_var_type_and_index(tokens.elements[1], &index2);
-
-        // m_v_mult({matrixvar}, {vectorvar})
-        char *ret = malloc(8 + strlen(tokens.elements[0]) + 2 + strlen(tokens.elements[1]) + 2);
-        strcpy(ret, "m_v_sum(");
-        if(strcmp(type_left, "matrix") == 0){
-            // matrix * vector
-            if((((int**)vars.matrix_dimensions.elements)[index1][0] != ((int**)vars.vector_dimensions.elements)[index2][0]) || (((int**)vars.matrix_dimensions.elements)[index1][0] != 1)){
-                return throw_error();
-            }
-            strcat(ret, tokens.elements[0]);
-            strcat(ret, ", ");
+        
+        // {func_name}({var1}, {var2})
+        char *ret = malloc(strlen(func_name) + 1 + strlen(tokens.elements[0]) + 2 + strlen(tokens.elements[1]) + 2);
+        strcpy(ret, func_name);
+        strcat(ret, "(");
+        if(in_reverse){
             strcat(ret, tokens.elements[1]);
+            strcat(ret, ", ");
+            strcat(ret, tokens.elements[0]);
         }else{
-            // vector * matrix
-            if(1 != ((int**)vars.vector_dimensions.elements)[index2][0] || (((int**)vars.matrix_dimensions.elements)[index2][0] != ((int**)vars.vector_dimensions.elements)[index1][0])){
-                return throw_error();
-            }
-            strcat(ret, tokens.elements[1]);
-            strcat(ret, ", ");
             strcat(ret, tokens.elements[0]);
+            strcat(ret, ", ");
+            strcat(ret, tokens.elements[1]);
         }
-        strcat(ret, ")\0");
-        return ret;
-    }else if(match_v_v_sum(expr)){
-        vector tokens = tokenize(expr, " +");
-        int index1 = 0;
-        int index2 = 0;
-        get_var_type_and_index(tokens.elements[0], &index1);
-        get_var_type_and_index(tokens.elements[1], &index2);
-
-        //check if dimensions match
-        if(((int**)vars.matrix_dimensions.elements)[index1][0] != ((int**)vars.matrix_dimensions.elements)[index2][0]){
-            return throw_error();
-        }
-
-        // v_v_sum({var1}, {var2})
-        char *ret = malloc(1 + strlen(tokens.elements[0]) + 2 + strlen(tokens.elements[1]) + 2);
-        strcpy(ret, "v_v_sum(");
-        strcat(ret, tokens.elements[0]);
-        strcat(ret, ", ");
-        strcat(ret, tokens.elements[1]);
-        strcat(ret, ")\0");
+        strcat(ret, ")");
         return ret;
     }else if(match_indexed_matrix(expr)){
         vector tokens = tokenize(expr, " [,]");
@@ -697,29 +567,29 @@ char* convert_complex_expr(char *expr){
         return ret;
     }else if(match_func(expr)){
         char *first = strchr(expr, '(');
-        char *last = strchr(expr, ')');
-        size_t first_index = first - expr;
-        size_t last_index = last - expr;
+        char *last = strrchr(expr, ')');
+        size_t first_index = first - expr+1;
+        size_t last_index = last - expr-1;
 
-        char *inside = malloc(last-first-1);
+        char *inside = malloc(last_index-first_index+1);
         strncpy(inside, first+1, last-first-1);
         char *inside_in_c = convert_complex_expr(inside);
         char *ret = malloc(first - expr + strlen(inside_in_c) + 1);
-        strncpy(ret, expr, first-expr-1);
+        strncpy(ret, expr, first-expr);
         strcat(ret, inside_in_c);
-        strcat(ret, ")");
+        // strcat(ret, ")");
         // free(first);
         // free(last);
         // free(inside_in_c);
         // free(inside);
         return ret;
     }
-
+    printf("cannot match: %s\n", expr);
     return "not imp of complex expr";
 }
 
 char* make_assignment(char *line){
-    if(strchr(strdup(line), '{') != NULL){
+    if(strchr(strdup(line), '{')){
         // can only be matrix or vector init.
         vector tokens = tokenize(line, " ={}\n\t");
         size_t index = 0;
@@ -819,7 +689,7 @@ char* make_assignment(char *line){
     
         // size_t index = 0;
         // char *type = get_var_type_and_index(tokens.elements[0], &index);
-        
+
         // if (index == -1){
         //     return throw_error(); // variable doesn't exist
         // }
@@ -888,14 +758,14 @@ char* make_assignment(char *line){
         strcat(line_in_c, " = ");
         strcat(line_in_c, expr_in_c);
         strcat(line_in_c, ";\0");
-        // free(expr_in_c);
+        // free(expr_in_c);git 
         return line_in_c;
         // }
     }
 }
 
 char* make_print_sep_func(){
-    return "----------";
+    return "print_sep();";
 }
 
 char* make_print_func(char *line){
@@ -917,6 +787,7 @@ char* make_print_func(char *line){
     return line_in_c;
 
 }
+
 char *make_for(char *line){
     vector check_tokens = tokenize(line, ":");
     if(check_tokens.size == 3){
@@ -1028,7 +899,7 @@ char *make_for(char *line){
         char *expr1 = malloc(expr1_size);
         strncpy(expr1, in+3, expr1_size);
         trim(expr1);
-        char expr1_in_c = convert_complex_expr(expr1);
+        char *expr1_in_c = convert_complex_expr(expr1);
 
         char *expr2_close = strchr(expr1_close+1, ':');
         size_t expr2_size = expr2_close - expr1_close - 1;
@@ -1153,8 +1024,8 @@ char* convert_line(char *line){
         vec_str_append(&tokens, line);
     }
 
-    if(strstr(line, "print(")){
-        return make_print_func(line);
+    if(strncmp(line, "#", 1) == 0){
+       return "comment";
     }else if(strstr(line, "printsep(")){
         return make_print_sep_func();
     }else if(prefix(line, "for") && strstr(line, ":") && strstr(line, "{")){
@@ -1167,10 +1038,10 @@ char* convert_line(char *line){
         return make_vector(line);
     }else if(strcmp(tokens.elements[0], "matrix") == 0){
         return make_matrix(line);
-    }else if(strcmp(tokens.elements[1], "=") == 0){
+    }else if(strchr(line, '=')){
         return make_assignment(line);
-    }else if(strncmp(line, "#", 1) == 0){
-       return "comment";
+    }else if(strstr(line, "print(")){
+       return make_print_func(line);
     }else{
         return "not imp";
     }
