@@ -167,12 +167,12 @@ bool proper_number_check(char *num_str){
 
 bool proper_varname_check(char *name){
     char first_char = name[0];
-    if(!((first_char <= 122 && first_char >= 65) || first_char == '_')){
+    if(!((first_char <= 'Z' && first_char >= 'A') || (first_char <= 'z' && first_char >= 'a') || first_char == '_')){
         return false;
     }
     for(int i = 1; i < strlen(name); i++){
         char c = name[i];
-        if( (c <= 122 && c >= 65) || c == '_' || c == '-'){
+        if((c <= 'Z' && c >= 'A') || (c <= 'z' && c >= 'a') || c == '_' || (c <= '9' && c >= '0')){
             continue;
         }else{
             return false;
