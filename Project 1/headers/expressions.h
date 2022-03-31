@@ -86,7 +86,7 @@ char* get_inside_choose_expr_close(char *str){
         ++ptr;
     }
 }
-// out ret type: 0 scalar, 1 vector, 2 matrix
+// out ret type: 0 scalar, 1 vector, 2 matrixx
 char* convert_complex_expr(char *expr, int *ret_type){
     trim(expr);
     printf("Converting: %s\n", expr);
