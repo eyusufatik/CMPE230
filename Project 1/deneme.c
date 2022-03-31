@@ -90,9 +90,33 @@ bool match_func(char *expr){
         return false;
     }
 }
+
+char* get_choose_expr_close(char *str){
+  
+    char *ptr = str;
+    int p_level = 0; // paranthesis
+    int s_level = 0; // square bracket
+    while(*ptr != '\0'){
+      printf("%s\n", ptr);
+        if (*ptr == '(')
+            ++p_level;
+        else if(*ptr == ')')
+            --p_level;
+        else if(*ptr == '[')
+            ++s_level;
+        else if(*ptr == ']')
+            --s_level;
+
+        if(s_level == 0 && p_level == 0 && *ptr == ',')
+            return ptr;
+        
+        ++ptr;
+    }
+}
 int main(){
-    char *expr = "sqrt(tr(y-x)*(y-x))";
-    printf("%d\n", match_func(expr));
+    char *expr = "bla[2,3], blo";
+    printf("%s\n", get_choose_expr_close(expr));
+    printf("%s\n", expr);
 
     // char *line = "a*b*c+c*c";
     // char *left = malloc(255);

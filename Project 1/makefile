@@ -1,4 +1,4 @@
-HEADERS = vector.h
+HEADERS = vector.h makers.h matchers.h utils.h vars.h expressions.h
 
 default: matlang2c
 

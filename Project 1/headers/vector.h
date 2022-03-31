@@ -1,3 +1,6 @@
+#ifndef VECTOR_H
+#define VECTOR_H
+
 #define VEC_START_SIZE 10
 //#define VEC_LAST_ELEMENT "\0"
 #include "stdlib.h"
@@ -63,6 +66,7 @@ size_t vec_str_find(vector vector, void* element){
     for(int i = 0; i < vector.size; i++){
         if (strcmp((char *)vector.elements[i], (char *)element) == 0){
             index = i;
+            break;
         }
     }
     return index;
@@ -72,4 +76,4 @@ size_t vec_str_find(vector vector, void* element){
 void free_str_vector(vector *vector){
     free(vector->elements);
 }
-
+#endif
