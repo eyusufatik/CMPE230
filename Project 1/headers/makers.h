@@ -264,9 +264,10 @@ char* make_print_func(char *line){
 
 }
 
-char *make_for(char *line){
+char *make_for(char *line, bool *double_for){
     vector check_tokens = tokenize(line, ":");
     if(check_tokens.size == 3){
+        *double_for = false;
         // single for
         /* find first (
             then get id
@@ -354,7 +355,8 @@ char *make_for(char *line){
         // free(expr3);free(expr3_in_c);free(for_var_part);free(bound_part);free(incr_part);
         return combined;
 
-    }else if(check_tokens.size == 6){
+    }else if(check_tokens.size == 5){
+        *double_for = true;
         // double for
         /*
             get to first (
@@ -512,7 +514,7 @@ char *make_for(char *line){
 
         char *double_for = malloc(strlen(combined) + 1 + strlen(combined2));
         strcpy(double_for, combined);
-        strcpy(double_for, combined2);
+        strcat(double_for, combined2);
 
         // TODO: free
         return double_for;
@@ -520,6 +522,5 @@ char *make_for(char *line){
         return throw_error();
     }
 }
-
 
 #endif

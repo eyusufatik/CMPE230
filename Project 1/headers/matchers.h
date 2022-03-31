@@ -12,7 +12,7 @@
 #include "utils.h"
 #include "vars.h"
 
-bool match_indexed_matrix(char *expr){
+bool match_indexed_matrix(char *expr){ 
     trim(expr);
     int s_open = countChars(expr, '[');
     int s_close = countChars(expr, ']');

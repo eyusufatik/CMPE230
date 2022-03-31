@@ -55,6 +55,8 @@ KURALLAR
 */
 
 
+bool double_for;
+
 
 char* convert_line(char *line){
     trim(line);
@@ -69,9 +71,13 @@ char* convert_line(char *line){
     }else if(strstr(line, "printsep(")){
         return make_print_sep_func();
     }else if(prefix(line, "for") && strstr(line, ":") && strstr(line, "{")){
-        return make_for(line);
+        return make_for(line, &double_for);
     }else if (strcmp(line, "}") == 0){
-        return line;
+        if(double_for){
+            return "}}";
+        }else{
+            return "}";
+        }
     }else if(strcmp(tokens.elements[0], "scalar") == 0){
         return make_scalar(line);
     }else if(strcmp(tokens.elements[0], "vector") == 0){
@@ -93,6 +99,8 @@ int main(int argc, char *argv[]){
     vars.vector_dimensions = vec_make_vector();
     vars.matrix_names = vec_make_vector();
     vars.matrix_dimensions = vec_make_vector();
+
+    double_for = false;
 
     FILE *matFile1;
     FILE *fp;
