@@ -16,7 +16,7 @@ A = { 1 1.67 1 0 }
 B = { 1 0 0 1 }
 print(x)
 for(i in 1:n:1) {
-    B = A*B
+    B = A * B
     y = B*x
     print(y[1])
 }

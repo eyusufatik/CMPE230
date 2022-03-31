@@ -1,1 +1,0 @@
-get_var_type_and_index
