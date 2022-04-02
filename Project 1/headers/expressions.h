@@ -284,8 +284,13 @@ char* convert_complex_expr(char *expr, int *ret_type){
         int inside_type = 0;
         char *inside_in_c = convert_complex_expr(inside, &inside_type);
         *ret_type = inside_type;
-        if(inside_type == 1 && strncmp(expr, "tr(", 3) == 0)
-            *ret_type = 2;
+        if(strncmp(expr, "tr(", 3) == 0){
+            if(inside_type == 1)
+                *ret_type = 2;
+            if(inside_type == 0){
+                return inside_in_c;
+            }
+        }
         if(strncmp(expr, "sqrt(", 5) == 0 && inside_type != 0)
             return throw_error();
         char *ret = malloc(first - expr + strlen(inside_in_c) + 1);
