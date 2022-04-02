@@ -40,7 +40,7 @@ void my_print_s(float s) {
 
 void my_print_v(out_vector v) {
     for(int i=0; i<v.size; i++){
-        printf("%f\n", ((flaot *)v.elements)[i]);
+        printf("%f\n", ((float *)v.elements)[i]);
     }
 }
 
