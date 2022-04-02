@@ -12,6 +12,13 @@ typedef struct out_matrix{
     size_t cols;
 }out_matrix;
 
+void print_float(float x){
+    if(fabs(x - (int)x) < 0.00001)
+        printf("%d\n", (int)x);
+    else
+        printf("%f\n", x);
+}
+
 out_vector make_out_vector(size_t size){
     out_vector vec;
     vec.elements = calloc(size, sizeof(float));
@@ -35,7 +42,7 @@ void print_sep() {
 }
 
 void my_print_s(float s) {
-    printf("%f\n", s);
+    print_float(s);
 }
 
 void my_print_v(out_vector v) {
@@ -47,7 +54,7 @@ void my_print_v(out_vector v) {
 void my_print_m(out_matrix m) {
     for(int i=0; i<m.rows; i++){
         for(int j=0; j<m.cols; j++){
-            printf("%f\n", ((float **)m.elements)[i][j]);
+            print_float(((float **)m.elements)[i][j]);
         }
     }
 }
@@ -62,7 +69,7 @@ out_matrix tr(out_matrix m) {
     return tr_m;
 }
 
-out_matrix tr(out_vector v) {
+out_matrix tr_v(out_vector v) {
     out_matrix tr_v = make_out_matrix(1, v.size);
     for(int i=0; i<v.size; i++){
         ((float **)tr_v.elements)[0][i] = ((float *)v.elements)[i];
@@ -121,18 +128,26 @@ out_matrix m_v_sum(out_matrix m,out_vector v) {
     return m_v_sum_m;
 }
 
-out_vector v_v_sum(out_vector v, out_vector v) {
-    out_vector v_v_sum_v = make_out_vector(v.size);
-    for(int i=0; i<v.size; i++){
-        ((float *)v_v_sum_v.elements)[i] = ((float *)v.elements)[i] + ((float *)v.elements)[i];
+out_vector v_m_mul(out_vector v, out_matrix m) {
+    out_vector v_m_mul_v = make_out_vector(m.cols);
+    for(int i=0; i<m.cols; i++){
+        ((float *)v_m_mul_v.elements)[i] = ((float *)v.elements)[i] * ((float **)m.elements)[0][i];
+    }
+    return v_m_mul_v;
+}
+
+out_vector v_v_sum(out_vector v1, out_vector v2) {
+    out_vector v_v_sum_v = make_out_vector(v1.size);
+    for(int i=0; i<v1.size; i++){
+        ((float *)v_v_sum_v.elements)[i] = ((float *)v1.elements)[i] + ((float *)v2.elements)[i];
     }
     return v_v_sum_v;
 }
 
-out_vector v_v_min(out_vector v, out_vector v) {
-    out_vector v_v_min_v = make_out_vector(v.size);
-    for(int i=0; i<v.size; i++){
-        ((float *)v_v_min_v.elements)[i] = ((float *)v.elements)[i] - ((float *)v.elements)[i];
+out_vector v_v_min(out_vector v1, out_vector v2) {
+    out_vector v_v_min_v = make_out_vector(v1.size);
+    for(int i=0; i<v1.size; i++){
+        ((float *)v_v_min_v.elements)[i] = ((float *)v1.elements)[i] - ((float *)v2.elements)[i];
     }
     return v_v_min_v;
 }
