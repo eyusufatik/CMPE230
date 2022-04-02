@@ -133,6 +133,7 @@ int main(int argc, char *argv[]){
         char *line_in_c = convert_line((char*)(lines.elements[i]));
 
         if(strcmp(line_in_c, "error") == 0){
+            printf("error at line: %s\n", lines.elements[i]);
             break;
         }else if(strcmp(line_in_c, "comment") == 0 ){
 

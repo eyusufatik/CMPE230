@@ -216,9 +216,20 @@ char* make_assignment(char *line){
         char *lhs = malloc(size);
         strncpy(lhs, line, size);
         int left_type = -1;
-        char *lhs_in_c = convert_complex_expr(lhs, &left_type);
+        int left_rows = -1;
+        int left_cols = -1;
+        char *lhs_in_c = convert_complex_expr(lhs, &left_type, &left_rows, &left_cols);
+
         int right_type = -1;
-        char *expr_in_c = convert_complex_expr(rhs, &right_type);
+        int right_rows = -1;
+        int right_cols = -1;
+        char *expr_in_c = convert_complex_expr(rhs, &right_type, &right_rows, &right_cols);
+        printf("%d %d %d %d\n", left_rows, left_cols, right_rows, right_cols);
+        if(left_rows != right_rows || left_cols != right_cols){
+            printf("here? %s\n", line);
+
+            return throw_error();
+        }
         printf("%s \n %d %d", line, left_type, right_type);
         // if (right_type != left_type){
         //     printf("cannot assing, expression doesnt return variable's type\n");
@@ -248,7 +259,8 @@ char* make_print_func(char *line){
     memcpy(expr, line+start, end-start+1);
     strcat(expr, "\0");
     int type = -1;
-    char *expr_in_c = convert_complex_expr(expr, &type);
+    int dummy = -1;
+    char *expr_in_c = convert_complex_expr(expr, &type, &dummy, &dummy);
     // my_print({expr_in_c});
     char *line_in_c = malloc(10 + strlen(expr)+3);
     if(type == 0)
@@ -266,6 +278,7 @@ char* make_print_func(char *line){
 
 char *make_for(char *line, bool *double_for){
     vector check_tokens = tokenize(line, ":");
+    int dummy = -1;
     if(check_tokens.size == 3){
         *double_for = false;
         // single for
@@ -291,7 +304,7 @@ char *make_for(char *line, bool *double_for){
         strncpy(expr1, in+3, expr1_size);
         trim(expr1);
         int type = -1;
-        char *expr1_in_c = convert_complex_expr(expr1, &type);
+        char *expr1_in_c = convert_complex_expr(expr1, &type, &dummy, &dummy);
         
         if(type != 0)
             return throw_error();
@@ -301,7 +314,7 @@ char *make_for(char *line, bool *double_for){
         char *expr2 = malloc(expr2_size);
         strncpy(expr2, expr1_close + 1, expr2_size);
         trim(expr2);
-        char *expr2_in_c = convert_complex_expr(expr2, &type);
+        char *expr2_in_c = convert_complex_expr(expr2, &type, &dummy, &dummy);
 
         if(type != 0)
             return throw_error();
@@ -311,7 +324,7 @@ char *make_for(char *line, bool *double_for){
         char *expr3 = malloc(expr3_size);
         strncpy(expr3, expr2_close + 1, expr3_size);
         trim(expr3);
-        char *expr3_in_c = convert_complex_expr(expr3, &type);
+        char *expr3_in_c = convert_complex_expr(expr3, &type, &dummy, &dummy);
 
         if(type != 0)
             return throw_error();
@@ -388,7 +401,7 @@ char *make_for(char *line, bool *double_for){
         strncpy(expr1, in+3, expr1_size);
         trim(expr1);
         int type = -1;
-        char *expr1_in_c = convert_complex_expr(expr1, &type);
+        char *expr1_in_c = convert_complex_expr(expr1, &type, &dummy, &dummy);
 
         if(type != 0)
             return throw_error();
@@ -398,7 +411,7 @@ char *make_for(char *line, bool *double_for){
         char *expr2 = malloc(expr2_size);
         strncpy(expr2, expr1_close + 1, expr2_size);
         trim(expr2);
-        char *expr2_in_c = convert_complex_expr(expr2, &type);
+        char *expr2_in_c = convert_complex_expr(expr2, &type, &dummy, &dummy);
 
         if(type != 0)
             return throw_error();
@@ -408,7 +421,7 @@ char *make_for(char *line, bool *double_for){
         char *expr3 = malloc(expr3_size);
         strncpy(expr3, expr2_close + 1, expr3_size);
         trim(expr3);
-        char *expr3_in_c = convert_complex_expr(expr3, &type);
+        char *expr3_in_c = convert_complex_expr(expr3, &type, &dummy, &dummy);
 
         if(type != 0)
             return throw_error();
@@ -418,7 +431,7 @@ char *make_for(char *line, bool *double_for){
         char *expr4 = malloc(expr4_size);
         strncpy(expr4, expr3_close + 1, expr4_size);
         trim(expr4);
-        char *expr4_in_c = convert_complex_expr(expr4, &type);
+        char *expr4_in_c = convert_complex_expr(expr4, &type, &dummy, &dummy);
 
         if(type != 0)
             return throw_error();
@@ -428,7 +441,7 @@ char *make_for(char *line, bool *double_for){
         char *expr5 = malloc(expr5_size);
         strncpy(expr5, expr4_close + 1, expr5_size);
         trim(expr5);
-        char *expr5_in_c = convert_complex_expr(expr5, &type);
+        char *expr5_in_c = convert_complex_expr(expr5, &type, &dummy, &dummy);
 
         if(type != 0)
             return throw_error();
@@ -438,7 +451,7 @@ char *make_for(char *line, bool *double_for){
         char *expr6 = malloc(expr6_size);
         strncpy(expr6, expr5_close + 1, expr6_size);
         trim(expr6);
-        char *expr6_in_c = convert_complex_expr(expr6, &type);
+        char *expr6_in_c = convert_complex_expr(expr6, &type, &dummy, &dummy);
 
         if(type != 0)
             return throw_error();

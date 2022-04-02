@@ -87,7 +87,7 @@ char* get_inside_choose_expr_close(char *str){
     }
 }
 // out ret type: 0 scalar, 1 vector, 2 matrixx
-char* convert_complex_expr(char *expr, int *ret_type){
+char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
     trim(expr);
     printf("Converting: %s\n", expr);
     
@@ -147,10 +147,18 @@ char* convert_complex_expr(char *expr, int *ret_type){
                         }else if(((int *)vars.matrix_dimensions.elements[index_left])[1] != ((int *)vars.matrix_dimensions.elements[index_right])[0]){
                             return throw_error();
                         }
+                        *rows = ((int *)vars.matrix_dimensions.elements[index_left])[0];
+                        *cols = ((int *)vars.matrix_dimensions.elements[index_right])[1];
                         break;
                     case 1:
                         if(((int *)vars.matrix_dimensions.elements[index_left])[1] != ((int *)vars.vector_dimensions.elements[index_right])[0])
                             return throw_error();
+                        *rows = ((int *)vars.matrix_dimensions.elements[index_left])[0];
+                        *cols = 1;
+                        break;
+                    case 0:
+                        *rows = ((int *)vars.matrix_dimensions.elements[index_left])[0];
+                        *cols = ((int *)vars.matrix_dimensions.elements[index_left])[1];
                         break;
                     default:
                         break;
@@ -161,19 +169,28 @@ char* convert_complex_expr(char *expr, int *ret_type){
                     case 2:
                         if(((int **)vars.matrix_dimensions.elements)[index_right][0] != 1)
                             return throw_error();
+                        *rows = ((int *)vars.vector_dimensions.elements[index_left])[0];
+                        *cols = ((int *)vars.matrix_dimensions.elements[index_right])[1];
                         break;
                     case 1:
-                        if(((int **)vars.vector_dimensions.elements)[index_left][0] != ((int **)vars.vector_dimensions.elements)[index_right][0])
+                        if(((int **)vars.vector_dimensions.elements)[index_left][0] != ((int **)vars.vector_dimensions.elements)[index_right][0] || operator == '*')
                             return throw_error();
+                        *rows = ((int *)vars.vector_dimensions.elements[index_left])[0];
+                        *cols = 1;
+                        break;
+                    case 0:
+                        *rows = ((int *)vars.vector_dimensions.elements[index_left])[0];
+                        *cols = 1;
                         break;
                     default:
                         break;
                 }
                 break;
             default:
+                *rows = 1;
+                *cols = 1;
                 break;
         }
-        
 
         // {func_name}({var1}, {var2})
         char *ret = malloc(strlen(func_name) + 1 + strlen(tokens.elements[0]) + 2 + strlen(tokens.elements[1]) + 2);
@@ -194,32 +211,49 @@ char* convert_complex_expr(char *expr, int *ret_type){
     }else if(match_indexed_matrix(expr)){
         vector tokens = tokenize(expr, " [,]");
         // {var_name}.elements[{i}][{j}]
-        char *ret = malloc(strlen(tokens.elements[0]) + 10 + strlen(tokens.elements[1]) + 2 + strlen(tokens.elements[2]) + 1);
+        char *ret = malloc(strlen(tokens.elements[0]) + 16 + strlen(tokens.elements[1]) + 9 + strlen(tokens.elements[2]) + 3);
         strcpy(ret, tokens.elements[0]);
-        strcat(ret, ".elements[");
+        strcat(ret, ".elements[round(");
         strcat(ret, tokens.elements[1]);
-        strcat(ret, "][");
+        strcat(ret, ")][round(");
         strcat(ret, tokens.elements[2]);
-        strcat(ret, "]");
+        strcat(ret, ")]\0");
         *ret_type = 0;
+        *rows = 1;
+        *cols = 1;
         return ret;
     }else if(match_indexed_vector(expr)){
         vector tokens = tokenize(expr, " [,]");
         // {var_name}.elements[{i}]
-        char *ret = malloc(strlen(tokens.elements[0]) + 10 + strlen(tokens.elements[1]) + 1);
+        char *ret = malloc(strlen(tokens.elements[0]) + 16 + strlen(tokens.elements[1]) + 3);
         strcpy(ret, tokens.elements[0]);
-        strcat(ret, ".elements[");
+        strcat(ret, ".elements[round(");
         strcat(ret, tokens.elements[1]);
-        strcat(ret, "]");
+        strcat(ret, ")]\0");
         *ret_type = 0;
+        *rows = 1;
+        *cols = 1;
         return ret;
     }else if(match_var(expr)){
-        int dummy = 0;
-        char *type = get_var_type_and_index(expr, &dummy);
+        int index = -1;
+        char *type = get_var_type_and_index(expr, &index);
+        if(strcmp(type, "matrix") == 0){
+            *rows = ((int *)vars.matrix_dimensions.elements[index])[0];
+            *cols = ((int *)vars.matrix_dimensions.elements[index])[1];
+            printf("%d %d\n", *rows, *cols);
+        }else if(strcmp(type, "vector") == 0){
+            *rows = ((int *)vars.vector_dimensions.elements[index])[0];
+            *cols = 1;
+        }else{
+            *rows = 1;
+            *cols = 1;
+        }
         *ret_type = type_to_int(type);
         return expr;
     }else if(match_num(expr)){
         *ret_type = 0;
+        *rows = 1;
+        *cols = 1;
         return expr;
     }else if(match_expr_op_expr(expr)){
         int level = 0;
@@ -235,17 +269,40 @@ char* convert_complex_expr(char *expr, int *ret_type){
                 strncpy(left, expr, i);
                 strncpy(right, expr+i+1, strlen(expr)-i);
 
+                int left_rows = -1;
+                int left_cols = -1;
                 int left_type = -1;
                 char *left_in_c = malloc(255);
-                strcpy(left_in_c, convert_complex_expr(left, &left_type));
+                strcpy(left_in_c, convert_complex_expr(left, &left_type, &left_rows, &left_cols));
+
+                int right_rows = -1;
+                int right_cols = -1;
                 int right_type = -1;
                 char *right_in_c = malloc(255);
-                strcpy(right_in_c, convert_complex_expr(right, &right_type));
+                strcpy(right_in_c, convert_complex_expr(right, &right_type, &right_rows, &right_cols));
+
+                // if any of the expressions is vector/matrix check dimensions
+                if(left_type != 0 || right_type != 0){
+                    if((c == '+' || c == '-') && (left_rows != right_rows || left_cols != right_cols))
+                        return throw_error();
+                    else if(c == '*' && left_cols != right_rows)
+                        return throw_error();
+                }
+        printf("%s %d %d %d %d\n", expr, left_rows, left_cols, right_rows, right_cols);
+
+                if(c == '*'){
+                    *rows = left_rows;
+                    *cols = right_cols;
+                }else{
+                    *rows = left_rows;
+                    *cols = right_cols;
+                }
+
                 int out_type = -1;
                 bool in_reverse = false;
                 char *func_name = malloc(8);
                 strcpy(func_name, get_func_for_arithmetic_op(left_type, right_type, c, &out_type, &in_reverse));
-                printf("func name: %s\n", get_func_for_arithmetic_op(left_type, right_type, c, &out_type, &in_reverse));
+
                 *ret_type = out_type;
                 char *ret = malloc(8 + 1 + strlen(left_in_c) + 2 + strlen(right_in_c) + 2);
                 strcpy(ret, func_name);
@@ -264,7 +321,7 @@ char* convert_complex_expr(char *expr, int *ret_type){
         char *exprr = malloc(strlen(expr)-2);
         strncpy(exprr, expr+1, strlen(expr)-2);
         int inside_type = 0;
-        char *expr_in_c = convert_complex_expr(exprr, &inside_type);
+        char *expr_in_c = convert_complex_expr(exprr, &inside_type, rows, cols);
         *ret_type = inside_type;
         char *ret = malloc(strlen(expr_in_c) + 2);
         strcpy(ret, "(");
@@ -282,9 +339,13 @@ char* convert_complex_expr(char *expr, int *ret_type){
         char *inside = malloc(last_index-first_index+1);
         strncpy(inside, first+1, last-first-1);
         int inside_type = 0;
-        char *inside_in_c = convert_complex_expr(inside, &inside_type);
+        char *inside_in_c = convert_complex_expr(inside, &inside_type, rows, cols);
+        printf("%s: %d %d\n",inside, *rows, *cols);
         *ret_type = inside_type;
         if(strncmp(expr, "tr(", 3) == 0){
+            int temp = *rows;
+            *rows = *cols;
+            *cols = temp;
             if(inside_type == 1)
                 *ret_type = 2;
             if(inside_type == 0){
@@ -312,9 +373,10 @@ char* convert_complex_expr(char *expr, int *ret_type){
         size_t expr1_size = expr1_close - expr1_start;
         char *expr1 = malloc(expr1_size);
         strncpy(expr1, expr1_start, expr1_size);
-
+        
+        int dummy = -1;
         int type = -1;
-        char *expr1_in_c = convert_complex_expr(expr1, &type);
+        char *expr1_in_c = convert_complex_expr(expr1, &type, &dummy, &dummy);
         if(type != 0)
             return throw_error();
 
@@ -325,7 +387,7 @@ char* convert_complex_expr(char *expr, int *ret_type){
         strncpy(expr2, expr1_close+1, expr2_size);
 
         type = -1;
-        char *expr2_in_c = convert_complex_expr(expr2, &type);
+        char *expr2_in_c = convert_complex_expr(expr2, &type, &dummy, &dummy);
         if(type != 0)
             return throw_error();
 
@@ -336,7 +398,7 @@ char* convert_complex_expr(char *expr, int *ret_type){
         strncpy(expr3, expr2_close+1, expr3_size);
 
         type = -1;
-        char *expr3_in_c = convert_complex_expr(expr3, &type);
+        char *expr3_in_c = convert_complex_expr(expr3, &type, &dummy, &dummy);
         if(type != 0)
             return throw_error();
 
@@ -347,7 +409,7 @@ char* convert_complex_expr(char *expr, int *ret_type){
         strncpy(expr4, expr3_close+1, expr4_size);
 
         type = -1;
-        char *expr4_in_c = convert_complex_expr(expr4, &type);
+        char *expr4_in_c = convert_complex_expr(expr4, &type, &dummy, &dummy);
         if(type != 0)
             return throw_error();
 
@@ -362,6 +424,8 @@ char* convert_complex_expr(char *expr, int *ret_type){
         strcat(ret, ", ");
         strcat(ret, expr4_in_c);
         strcat(ret, ")\0");
+        *rows = 1;
+        *cols = 1;
         return ret;
     }
     printf("cannot match: %s\n", expr);
