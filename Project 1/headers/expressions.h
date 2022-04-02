@@ -354,8 +354,11 @@ char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
         }
         if(strncmp(expr, "sqrt(", 5) == 0 && inside_type != 0)
             return throw_error();
-        char *ret = malloc(first - expr + strlen(inside_in_c) + 1);
+        char *ret = malloc(first - expr + strlen(inside_in_c) + 3);
         strncpy(ret, expr, first-expr);
+        if(inside_type == 1){
+            strcat(ret, "_v");
+        }
         strcat(ret, "(");
         strcat(ret, inside_in_c);
         printf("inside in c: %s\n", inside_in_c);
