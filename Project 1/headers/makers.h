@@ -225,10 +225,8 @@ char* make_assignment(char *line){
         int right_cols = -1;
         char *expr_in_c = convert_complex_expr(rhs, &right_type, &right_rows, &right_cols);
         if(left_rows != right_rows || left_cols != right_cols){
-
             return throw_error();
         }
-        printf("%s \n %d %d", line, left_type, right_type);
         // if (right_type != left_type){
         //     printf("cannot assing, expression doesnt return variable's type\n");
         //     return throw_error();
@@ -336,9 +334,9 @@ char *make_for(char *line, bool *double_for){
 
         // bound part
         // {var_name} < {expr2};
-        char *bound_part = malloc(strlen(var_name) + 3 + strlen(expr2_in_c) + 2);
+        char *bound_part = malloc(strlen(var_name) + 4 + strlen(expr2_in_c) + 2);
         strcpy(bound_part, var_name);
-        strcat(bound_part, " < ");
+        strcat(bound_part, " <= ");
         strcat(bound_part, expr2_in_c);
         strcat(bound_part, ";\0");
 
@@ -463,9 +461,9 @@ char *make_for(char *line, bool *double_for){
 
         // bound part
         // {var_name} < {expr2};
-        char *bound_part = malloc(strlen(var1) + 3 + strlen(expr2_in_c) + 2);
+        char *bound_part = malloc(strlen(var1) + 4 + strlen(expr2_in_c) + 2);
         strcpy(bound_part, var1);
-        strcat(bound_part, " < ");
+        strcat(bound_part, " <= ");
         strcat(bound_part, expr2_in_c);
         strcat(bound_part, ";\0");
 
@@ -498,9 +496,9 @@ char *make_for(char *line, bool *double_for){
 
         // bound part
         // {var_name} < {expr5};
-        char *bound_part2 = malloc(strlen(var2) + 3 + strlen(expr5_in_c) + 2);
+        char *bound_part2 = malloc(strlen(var2) + 4 + strlen(expr5_in_c) + 2);
         strcpy(bound_part2, var2);
-        strcat(bound_part2, " < ");
+        strcat(bound_part2, " <= ");
         strcat(bound_part2, expr5_in_c);
         strcat(bound_part2, ";\0");
 

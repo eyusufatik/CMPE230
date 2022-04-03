@@ -3,7 +3,7 @@
 #include "string.h"
 #include "ctype.h"
 #include "stdbool.h"
-#include "output_header.h"
+#include "math.h"
 
 char *trim(char *str)
 {
@@ -113,10 +113,15 @@ char* get_choose_expr_close(char *str){
         ++ptr;
     }
 }
+
+int my_round(float f){
+    float rounded = round(f);
+    return (int) rounded;
+}
+
 int main(){
-    char *expr = "bla[2,3], blo";
-    printf("%s\n", get_choose_expr_close(expr));
-    printf("%s\n", expr);
+    printf("%d\n", my_round(2.0000132));
+
 
     // char *line = "a*b*c+c*c";
     // char *left = malloc(255);

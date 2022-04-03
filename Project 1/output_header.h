@@ -1,5 +1,6 @@
 #include "stdlib.h"
 #include "stdio.h"
+#include "math.h"
 
 typedef struct out_vector{
     float *elements;
@@ -183,6 +184,11 @@ out_vector v_s_mul(out_vector v, float s) {
     return v_s_mul_v;
 }
 
-float sqrt(float f) {
-    return sqrtf(f);
+// float sqrt(float f) {
+//     return sqrtf(f);
+// }
+
+int my_round(float f){
+    float rounded = round(f);
+    return (int) rounded;
 }
