@@ -14,11 +14,16 @@ typedef struct out_matrix{
     size_t cols;
 }out_matrix;
 
+int my_round(float f){
+    float rounded = round(f);
+    return (int) rounded;
+}
+
 void print_float(float x){
-    if(fabs(x - round(x)) < 0.00001)
-        printf("%d\n", (int)x);
+    if(fabs(x - round(x)) < EPSILON)
+        printf("%d\n", my_round(x));
     else
-        printf("%f\n", x);
+        printf("%.7f\n", x);
 }
 
 // out_vector make_out_vector(size_t size){
@@ -49,7 +54,7 @@ void my_print_s(float s) {
 
 void my_print_v(out_matrix v) {
     for(int i=0; i<v.rows; i++){
-        printf("%f\n", v.elements[i][0]);
+        print_float(v.elements[i][0]);
     }
 }
 
@@ -189,10 +194,7 @@ out_matrix v_s_mul(out_matrix v, float s) {
 //     return sqrtf(f);
 // }
 
-int my_round(float f){
-    float rounded = round(f);
-    return (int) rounded;
-}
+
 
 float choose(float x, float y, float z, float t){
     if(fabs(x) < EPSILON)

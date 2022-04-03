@@ -109,7 +109,7 @@ int main(int argc, char *argv[]){
     // open up file to read and write to.
     FILE *matFile1;
     FILE *fp;
-    fp = fopen("file.c", "w");
+    fp = fopen("output.c", "w");
     fprintf(fp, "%s\n%s\n", "#include \"output_header.h\"", "int main(){");
     if(argc > 1){
         matFile1 = fopen(argv[1], "r");
