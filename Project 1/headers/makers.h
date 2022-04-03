@@ -505,11 +505,11 @@ char *make_for(char *line, bool *double_for){
         // increment part
         // {var_name} += {expr6}
         char *incr_part2 = malloc(strlen(var2) + 4 + strlen(expr6_in_c));
-        strcpy(incr_part, var2);
-        strcat(incr_part, " += ");
-        strcat(incr_part, expr6_in_c);
-        strcat(incr_part, "\0");
-
+        strcpy(incr_part2, var2);
+        strcat(incr_part2, " += ");
+        strcat(incr_part2, expr6_in_c);
+        strcat(incr_part2, "\0");
+        
         // inside for
         // for({var2} {bound_part2} {incr_part2}) {
         char *combined2 = malloc(4 + strlen(for_var_part2) + 5 + strlen(bound_part2) + strlen(incr_part2));
