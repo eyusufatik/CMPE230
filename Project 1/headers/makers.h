@@ -66,12 +66,12 @@ char* make_vector(char *line) {
 
     //                 out_vector {var_name} = make_out_vector({var_dimension});\0
     //                 int {var_name}[{var_dimension}] = {0};\0
-    char *ret_line = malloc(strlen("out_vector ") + strlen(var_name) + strlen(" = make_out_vector(") + strlen(var_tokens.elements[2]) + strlen(");") + 1);
-    strcpy(ret_line, "out_vector ");
+    char *ret_line = malloc(strlen("out_matrix ") + strlen(var_name) + strlen(" = make_out_matrix(") + strlen(var_tokens.elements[2]) + strlen(", 1);") + 1);
+    strcpy(ret_line, "out_matrix ");
     strcat(ret_line, var_name);
-    strcat(ret_line, " = make_out_vector(");
+    strcat(ret_line, " = make_out_matrix(");
     strcat(ret_line, var_tokens.elements[2]);
-    strcat(ret_line, ");\0");
+    strcat(ret_line, ", 1);\0");
     return ret_line;
 }
 
@@ -143,11 +143,11 @@ char* make_assignment(char *line){
                 char *value = tokens.elements[i+1];
                                  //({caster}x.elements)[0] = 2.3;
                                  // {var_name}.elements[{i}] = {value};
-                char *op = malloc(strlen(tokens.elements[0]) + 10 +strlen(i_str) + 4 + strlen(value)+2);
+                char *op = malloc(strlen(tokens.elements[0]) + 10 +strlen(i_str) + 7 + strlen(value)+2);
                 strcpy(op, tokens.elements[0]);
                 strcat(op, ".elements[");
                 strcat(op, i_str);
-                strcat(op, "] = ");
+                strcat(op, "][0] = ");
                 strcat(op, value);
                 strcat(op, ";\0");
                 vec_str_append(&set_ops, op);
