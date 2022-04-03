@@ -8,7 +8,9 @@
 #include "expressions.h"
 #include <math.h>
 
-
+/*
+    Declaration of sclars
+*/
 char* make_scalar(char *line) {
     vector tokens = tokenize(line, " \n\t");
     if(tokens.size != 2){
@@ -39,6 +41,9 @@ char* make_scalar(char *line) {
     return ret_line;
 }
 
+/*
+    Declaration of vectors.
+*/
 char* make_vector(char *line) {
     vector var_tokens = tokenize(line, " []\n\t");
 
@@ -76,6 +81,9 @@ char* make_vector(char *line) {
     return ret_line;
 }
 
+/*
+    Declaration of matrices
+*/
 char* make_matrix(char *line) {
     vector var_tokens = tokenize(line, " [,]\n\t");
 
@@ -116,19 +124,17 @@ char* make_matrix(char *line) {
     return ret_line;
 }
 
+
+/*
+    <var> = <expr>
+*/
 char* make_assignment(char *line){
     if(strchr(strdup(line), '{')){
         // can only be matrix or vector init.
         vector tokens = tokenize(line, " ={}\n\t");
         int index = 0;
         vector float_test_tokens = tokenize(line, ". ={}\n\t");
-        // char *caster;
-
-        // if(tokens.size != float_test_tokens.size){
-        //     caster = "(float *)";
-        // }else{
-        //     caster = "(int *)";
-        // }
+        
         char *type = get_var_type_and_index(tokens.elements[0], &index);
         if(strcmp(type, "vector") == 0){
             // found in vectors
@@ -212,6 +218,7 @@ char* make_assignment(char *line){
             return throw_error();
         }
     }else{
+        // either basic scalar init. or complex exprs involved.
         char *rhs = strstr(line, "=") + 1; // right hand side of assignment
         size_t size = rhs-line-1;
         char *lhs = malloc(size);
@@ -228,17 +235,13 @@ char* make_assignment(char *line){
         if(left_rows != right_rows || left_cols != right_cols){
             return throw_error();
         }
-        // if (right_type != left_type){
-        //     printf("cannot assing, expression doesnt return variable's type\n");
-        //     return throw_error();
-        // }
-        // {var_name} = {expr_in_c};
+        
         char *line_in_c = malloc(strlen(lhs_in_c) + 3 + strlen(expr_in_c) + 2);
         strcpy(line_in_c, lhs_in_c);
         strcat(line_in_c, " = ");
         strcat(line_in_c, expr_in_c);
         strcat(line_in_c, ";\0");
-        // free(expr_in_c);git
+        // free(expr_in_c);
         return line_in_c;
     }
 }
@@ -247,6 +250,9 @@ char* make_print_sep_func(){
     return "print_sep();";
 }
 
+/*
+    Chooses output printer function for the given line of expression.
+*/
 char* make_print_func(char *line){
     trim(line);
     // if we are here we have print(<expr>)
@@ -273,6 +279,9 @@ char* make_print_func(char *line){
 
 }
 
+/*
+    Converts for loops to C
+*/
 char *make_for(char *line, bool *double_for){
     vector check_tokens = tokenize(line, ":");
     int dummy = -1;

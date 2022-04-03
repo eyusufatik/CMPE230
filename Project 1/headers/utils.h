@@ -11,11 +11,19 @@
 #include "vector.h"
 #include "vars.h"
 
-
+/*
+    function we use for errors
+*/
 char* throw_error(){
     return "error";
 }
 
+/*
+    Converts "matrix" e.g. to type integer
+    0 -> scalar
+    1 -> vector
+    2 -> matrix
+*/
 int type_to_int(char *type){
     if(strcmp(type, "matrix") == 0){
         return 2;
@@ -28,13 +36,18 @@ int type_to_int(char *type){
     }
 }
 
-int countChars( char* s, char c )
-{
+/*
+    Count chars in a string
+*/
+int countChars( char* s, char c ){
     return *s == '\0'
               ? 0
               : countChars( s + 1, c ) + (*s == c);
 }
 
+/*
+    Trims whitespace before and after the string by shifting pointers.
+*/
 char *trim(char *str){
     size_t len = 0;
     char *frontp = str;
@@ -46,9 +59,6 @@ char *trim(char *str){
     len = strlen(str);
     endp = str + len;
 
-    /* Move the front and back pointers to address the first non-whitespace
-     * characters from each end.
-     */
     while( isspace((unsigned char) *frontp) ) { ++frontp; }
     if( endp != frontp )
     {
@@ -60,10 +70,7 @@ char *trim(char *str){
     else if( str + len - 1 != endp )
             *(endp + 1) = '\0';
 
-    /* Shift the string so that it starts at str so that if it's dynamically
-     * allocated, we can still free it on the returned pointer.  Note the reuse
-     * of endp to mean the front of the string buffer now.
-     */
+    
     endp = str;
     if( frontp != str )
     {
@@ -74,10 +81,16 @@ char *trim(char *str){
     return str;
 }
 
+/*
+    Checks if string starts with another string
+*/
 bool prefix(const char *str, const char *pre){
     return strncmp(str, pre, strlen(pre)) == 0;
 }
 
+/*
+    Tokenize the string with the given delimeters.
+*/
 vector tokenize(char *str, char *delimeter){
     vector tokens = vec_make_vector();
     char *token = strtok(strdup(str), delimeter);
@@ -88,6 +101,9 @@ vector tokenize(char *str, char *delimeter){
     return tokens;
 }
 
+/*
+    Returns var type and index of the var in the vars struct vector.
+*/
 char* get_var_type_and_index(char *var_name, int *index_out){
     size_t index = -1;
     if((index = vec_str_find(vars.scalar_names, var_name)) != -1){
@@ -105,6 +121,9 @@ char* get_var_type_and_index(char *var_name, int *index_out){
     }
 }
 
+/*
+    Returns if a number is syntatically correct.
+*/
 bool proper_number_check(char *num_str){
     int dot_count = 0;
     // check if rhs is proper number
@@ -120,14 +139,13 @@ bool proper_number_check(char *num_str){
             }
         }
     }
-    // if(dot_count == 1){
-    //     *caster = "(float *)";
-    // }else{
-    //     *caster = "(int *)";
-    // }
+    
     return true;
 }
 
+/*
+    Returns if a variable name is syntatically correct.
+*/
 bool proper_varname_check(char *name){
     char first_char = name[0];
     if(!((first_char <= 'Z' && first_char >= 'A') || (first_char <= 'z' && first_char >= 'a') || first_char == '_')){
