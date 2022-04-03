@@ -66,12 +66,12 @@ char* make_vector(char *line) {
 
     //                 out_vector {var_name} = make_out_vector({var_dimension});\0
     //                 int {var_name}[{var_dimension}] = {0};\0
-    char *ret_line = malloc(strlen("out_vector ") + strlen(var_name) + strlen(" = make_out_vector(") + strlen(var_tokens.elements[2]) + strlen(");") + 1);
-    strcpy(ret_line, "out_vector ");
+    char *ret_line = malloc(strlen("out_matrix ") + strlen(var_name) + strlen(" = make_out_matrix(") + strlen(var_tokens.elements[2]) + strlen(", 1);") + 1);
+    strcpy(ret_line, "out_matrix ");
     strcat(ret_line, var_name);
-    strcat(ret_line, " = make_out_vector(");
+    strcat(ret_line, " = make_out_matrix(");
     strcat(ret_line, var_tokens.elements[2]);
-    strcat(ret_line, ");\0");
+    strcat(ret_line, ", 1);\0");
     return ret_line;
 }
 
@@ -143,11 +143,11 @@ char* make_assignment(char *line){
                 char *value = tokens.elements[i+1];
                                  //({caster}x.elements)[0] = 2.3;
                                  // {var_name}.elements[{i}] = {value};
-                char *op = malloc(strlen(tokens.elements[0]) + 10 +strlen(i_str) + 4 + strlen(value)+2);
+                char *op = malloc(strlen(tokens.elements[0]) + 10 +strlen(i_str) + 7 + strlen(value)+2);
                 strcpy(op, tokens.elements[0]);
                 strcat(op, ".elements[");
                 strcat(op, i_str);
-                strcat(op, "] = ");
+                strcat(op, "][0] = ");
                 strcat(op, value);
                 strcat(op, ";\0");
                 vec_str_append(&set_ops, op);
@@ -225,10 +225,8 @@ char* make_assignment(char *line){
         int right_cols = -1;
         char *expr_in_c = convert_complex_expr(rhs, &right_type, &right_rows, &right_cols);
         if(left_rows != right_rows || left_cols != right_cols){
-
             return throw_error();
         }
-        printf("%s \n %d %d", line, left_type, right_type);
         // if (right_type != left_type){
         //     printf("cannot assing, expression doesnt return variable's type\n");
         //     return throw_error();
@@ -336,9 +334,9 @@ char *make_for(char *line, bool *double_for){
 
         // bound part
         // {var_name} < {expr2};
-        char *bound_part = malloc(strlen(var_name) + 3 + strlen(expr2_in_c) + 2);
+        char *bound_part = malloc(strlen(var_name) + 4 + strlen(expr2_in_c) + 2);
         strcpy(bound_part, var_name);
-        strcat(bound_part, " < ");
+        strcat(bound_part, " <= ");
         strcat(bound_part, expr2_in_c);
         strcat(bound_part, ";\0");
 
@@ -463,9 +461,9 @@ char *make_for(char *line, bool *double_for){
 
         // bound part
         // {var_name} < {expr2};
-        char *bound_part = malloc(strlen(var1) + 3 + strlen(expr2_in_c) + 2);
+        char *bound_part = malloc(strlen(var1) + 4 + strlen(expr2_in_c) + 2);
         strcpy(bound_part, var1);
-        strcat(bound_part, " < ");
+        strcat(bound_part, " <= ");
         strcat(bound_part, expr2_in_c);
         strcat(bound_part, ";\0");
 
@@ -498,20 +496,20 @@ char *make_for(char *line, bool *double_for){
 
         // bound part
         // {var_name} < {expr5};
-        char *bound_part2 = malloc(strlen(var2) + 3 + strlen(expr5_in_c) + 2);
+        char *bound_part2 = malloc(strlen(var2) + 4 + strlen(expr5_in_c) + 2);
         strcpy(bound_part2, var2);
-        strcat(bound_part2, " < ");
+        strcat(bound_part2, " <= ");
         strcat(bound_part2, expr5_in_c);
         strcat(bound_part2, ";\0");
 
         // increment part
         // {var_name} += {expr6}
         char *incr_part2 = malloc(strlen(var2) + 4 + strlen(expr6_in_c));
-        strcpy(incr_part, var2);
-        strcat(incr_part, " += ");
-        strcat(incr_part, expr6_in_c);
-        strcat(incr_part, "\0");
-
+        strcpy(incr_part2, var2);
+        strcat(incr_part2, " += ");
+        strcat(incr_part2, expr6_in_c);
+        strcat(incr_part2, "\0");
+        
         // inside for
         // for({var2} {bound_part2} {incr_part2}) {
         char *combined2 = malloc(4 + strlen(for_var_part2) + 5 + strlen(bound_part2) + strlen(incr_part2));

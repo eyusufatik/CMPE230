@@ -216,13 +216,13 @@ char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
     }else if(match_indexed_matrix(expr)){
         vector tokens = tokenize(expr, " [,]");
         // {var_name}.elements[{i}][{j}]
-        char *ret = malloc(strlen(tokens.elements[0]) + 16 + strlen(tokens.elements[1]) + 9 + strlen(tokens.elements[2]) + 3);
+        char *ret = malloc(strlen(tokens.elements[0]) + 21 + strlen(tokens.elements[1]) + 14 + strlen(tokens.elements[2]) + 3);
         strcpy(ret, tokens.elements[0]);
-        strcat(ret, ".elements[round(");
+        strcat(ret, ".elements[my_round(");
         strcat(ret, tokens.elements[1]);
-        strcat(ret, ")][round(");
+        strcat(ret, ")-1][my_round(");
         strcat(ret, tokens.elements[2]);
-        strcat(ret, ")]\0");
+        strcat(ret, ")-1]\0");
         *ret_type = 0;
         *rows = 1;
         *cols = 1;
@@ -230,11 +230,11 @@ char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
     }else if(match_indexed_vector(expr)){
         vector tokens = tokenize(expr, " [,]");
         // {var_name}.elements[{i}]
-        char *ret = malloc(strlen(tokens.elements[0]) + 16 + strlen(tokens.elements[1]) + 3);
+        char *ret = malloc(strlen(tokens.elements[0]) + 19 + strlen(tokens.elements[1]) + 7);
         strcpy(ret, tokens.elements[0]);
-        strcat(ret, ".elements[round(");
+        strcat(ret, ".elements[my_round(");
         strcat(ret, tokens.elements[1]);
-        strcat(ret, ")]\0");
+        strcat(ret, ")-1][0]\0");
         *ret_type = 0;
         *rows = 1;
         *cols = 1;
