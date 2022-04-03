@@ -277,7 +277,7 @@ char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
             // var not found.
             return throw_error();
         }
-        
+
         if(strcmp(type, "matrix") == 0){
             *rows = ((int *)vars.matrix_dimensions.elements[index])[0];
             *cols = ((int *)vars.matrix_dimensions.elements[index])[1];
@@ -291,15 +291,21 @@ char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
         }
         *ret_type = type_to_int(type);
         return expr;
-    }else if(match_num(expr)){
+    }
+    // <number>
+    else if(match_num(expr)){
         *ret_type = 0;
         *rows = 1;
         *cols = 1;
         return expr;
-    }else if(match_expr_op_expr(expr)){
+    }
+    // <expr> <op> <expr>
+    else if(match_expr_op_expr(expr)){
         int level = 0;
         for(int i = 0; i < strlen(expr); i++){
             char c = expr[i];
+
+            // so that we don't evaluate inside of paranthesis
             if(c == '(')
                 ++level;
             else if(c == ')')
@@ -358,7 +364,9 @@ char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
                 return ret;
             }
         }
-    }else if(match_expr_in_paran(expr)){
+    }
+    // (<expr>)
+    else if(match_expr_in_paran(expr)){
         char *exprr = malloc(strlen(expr)-2);
         strncpy(exprr, expr+1, strlen(expr)-2);
         int inside_type = 0;
@@ -371,7 +379,9 @@ char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
         // free(exprr);
         // free(expr_in_c);
         return ret;
-    }else if(match_func(expr)){
+    }
+    // <func>(<expr>)
+    else if(match_func(expr)){
         char *first = strchr(expr, '(');
         char *last = strrchr(expr, ')');
         size_t first_index = first - expr+1;
@@ -411,7 +421,9 @@ char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
         // free(inside_in_c);
         // free(inside);
         return ret;
-    }else if(match_choose(expr)){
+    }
+    // choose(<expr_list>)
+    else if(match_choose(expr)){
         char *expr1_start = strchr(expr, '(')+1;
         char *expr1_close = get_inside_choose_expr_close(expr1_start);
         size_t expr1_size = expr1_close - expr1_start;

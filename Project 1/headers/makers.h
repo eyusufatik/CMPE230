@@ -6,7 +6,7 @@
 #include "utils.h"
 #include "vars.h"
 #include "expressions.h"
-#include "math.h"
+#include <math.h>
 
 
 char* make_scalar(char *line) {
