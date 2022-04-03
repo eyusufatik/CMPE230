@@ -6,6 +6,7 @@
 #include "matchers.h"
 #include "utils.h"
 #include "vars.h"
+#include "expressions.h"
 
 /*
     Returns function name, return type and order of the vars in the funciton.

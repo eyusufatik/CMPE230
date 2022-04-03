@@ -76,7 +76,6 @@ size_t vec_str_find(vector vector, void* element){
     }
     return index;
 }
-
 // do we even need this?
 void free_str_vector(vector *vector){
     free(vector->elements);

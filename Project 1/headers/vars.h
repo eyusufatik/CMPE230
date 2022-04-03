@@ -1,6 +1,8 @@
 #ifndef VARS_H
 #define VARS_H
 
+#include "vector.h"
+
 // Struct to hold vars.
 static struct Variables {
     vector scalar_names;
