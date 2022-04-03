@@ -108,12 +108,11 @@ out_matrix m_m_min(out_matrix m1, out_matrix m2) {
     return m_m_min_m;
 }
 
-out_matrix m_v_mul(out_matrix m,out_vector v) {
-    out_matrix m_v_mul_m = make_out_matrix(m.rows, m.cols);
+out_vector m_v_mul(out_matrix m,out_vector v) {
+    out_vector m_v_mul_m = make_out_vector(m.rows);
     for(int i=0; i<m.rows; i++){
-        for(int j=0; j<m.cols; j++){
-            ((float **)m_v_mul_m.elements)[i][j] = ((float **)m.elements)[i][j] * ((float *)v.elements)[j];
-        }
+        for(int j=0; j<m.cols; j++)
+            ((float *)m_v_mul_m.elements)[i] = ((float **)m.elements)[i][j] * ((float *)v.elements)[j];
     }
     return m_v_mul_m;
 }
@@ -128,12 +127,14 @@ out_matrix m_v_sum(out_matrix m,out_vector v) {
     return m_v_sum_m;
 }
 
-out_vector v_m_mul(out_vector v, out_matrix m) {
-    out_vector v_m_mul_v = make_out_vector(m.cols);
-    for(int i=0; i<m.cols; i++){
-        ((float *)v_m_mul_v.elements)[i] = ((float *)v.elements)[i] * ((float **)m.elements)[0][i];
+out_matrix v_m_mul(out_vector v, out_matrix m) {
+    out_matrix v_m_mul_m = make_out_matrix(v.size, m.cols);
+    for(int i=0; i<v.size; i++){
+        for(int j=0; j<m.cols; j++){
+            ((float **)v_m_mul_m.elements)[i][j] += ((float *)v.elements)[i] * ((float **)m.elements)[0][j];
+        }
     }
-    return v_m_mul_v;
+    return v_m_mul_m;
 }
 
 out_vector v_v_sum(out_vector v1, out_vector v2) {

@@ -224,9 +224,7 @@ char* make_assignment(char *line){
         int right_rows = -1;
         int right_cols = -1;
         char *expr_in_c = convert_complex_expr(rhs, &right_type, &right_rows, &right_cols);
-        printf("%d %d %d %d\n", left_rows, left_cols, right_rows, right_cols);
         if(left_rows != right_rows || left_cols != right_cols){
-            printf("here? %s\n", line);
 
             return throw_error();
         }

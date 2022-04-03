@@ -19,11 +19,16 @@ char* get_func_for_arithmetic_op(int type_left, int type_right, char operator, i
                 return "m_m_min";
     }else if((type_left == 2 && type_right == 1) ||
                     (type_left == 1 && type_right == 2)){
-        *in_reverse = type_left == 1;
+        *in_reverse = (type_left == 1);
         if(in_reverse)
             *ret_type = 2;
         else
             *ret_type = 1;
+
+        if(*in_reverse && operator == '*'){
+            *in_reverse = false;
+            return "v_m_mul";
+        }
         
         if (operator == '*')
             return "m_v_mul";
