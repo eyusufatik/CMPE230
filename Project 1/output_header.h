@@ -114,7 +114,7 @@ out_matrix m_v_mul(out_matrix m, out_matrix v) {
     out_matrix m_v_mul_m = make_out_matrix(m.rows, 1);
     for(int i=0; i<m.rows; i++){
         for(int j=0; j<m.cols; j++)
-            m_v_mul_m.elements[i][0] = m.elements[i][j] * v.elements[j][0];
+            m_v_mul_m.elements[i][0] += m.elements[i][j] * v.elements[j][0];
     }
     return m_v_mul_m;
 }
