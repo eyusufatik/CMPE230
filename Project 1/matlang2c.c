@@ -54,10 +54,13 @@ KURALLAR
 
 */
 
-
+// global var for printing } or }} outside a matlang for loop
 bool double_for;
 
-
+/*
+    Finds out if a line is a comment, print statement, declaration, 
+    assignment statement or a for loop start/end
+*/
 char* convert_line(char *line){
     trim(line);
     vector tokens = tokenize(line, " \n\t");
@@ -94,6 +97,7 @@ char* convert_line(char *line){
 }
 
 int main(int argc, char *argv[]){
+    // Initialize var name and dimension holders
     vars.scalar_names = vec_make_vector();
     vars.vector_names = vec_make_vector();
     vars.vector_dimensions = vec_make_vector();
@@ -102,6 +106,7 @@ int main(int argc, char *argv[]){
 
     double_for = false;
 
+    // open up file to read and write to.
     FILE *matFile1;
     FILE *fp;
     fp = fopen("file.c", "w");
@@ -117,28 +122,30 @@ int main(int argc, char *argv[]){
         return 0;
     }
 
+    // read line and hold them in a string vector.
     char *line_buf = NULL;
     size_t line_buf_size = 0;
     ssize_t read;
 
     vector lines = vec_make_vector();
-    // variable allocating
     while ((read = getline(&line_buf, &line_buf_size, matFile1)) != -1) {
         if(strcmp(line_buf, "\n") != 0)
             vec_str_append(&lines, line_buf);
     }
 
+
+    // convert each line to C
     for (int i = 0; i < lines.size; i++){
         printf("%s", (char*)(lines.elements[i]));
         char *line_in_c = convert_line((char*)(lines.elements[i]));
 
         if(strcmp(line_in_c, "error") == 0){
-            printf("error at line: %s\n", lines.elements[i]);
+            printf("error at line (%d): \n", i);
             break;
         }else if(strcmp(line_in_c, "comment") == 0 ){
 
         }else{
-            fprintf(fp, "%s\n", line_in_c);
+            fprintf(fp, "%s\n", line_in_c); // if line is not a comment or doesn't contain syntax errors. Write to output file.
         }
     }
     fprintf(fp, "%s\n", "}");

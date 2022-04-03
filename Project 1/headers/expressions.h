@@ -7,8 +7,11 @@
 #include "utils.h"
 #include "vars.h"
 
-
+/*
+    Returns function name, return type and order of the vars in the funciton.
+*/
 char* get_func_for_arithmetic_op(int type_left, int type_right, char operator, int *ret_type, bool *in_reverse){
+    // matrix operator matrix
     if(type_left == 2 && type_right ==2){
             *ret_type = 2;
             if (operator == '*')
@@ -17,7 +20,9 @@ char* get_func_for_arithmetic_op(int type_left, int type_right, char operator, i
                 return "m_m_sum";
             else
                 return "m_m_min";
-    }else if((type_left == 2 && type_right == 1) ||
+    }
+    // matrix operator vector or vector operator matrix
+    else if((type_left == 2 && type_right == 1) ||
                     (type_left == 1 && type_right == 2)){
         *in_reverse = (type_left == 1);
         if(in_reverse)
@@ -37,7 +42,9 @@ char* get_func_for_arithmetic_op(int type_left, int type_right, char operator, i
         else
             return "m_v_min";
         
-    }else if(type_left == 1 && type_right == 1){
+    }
+    // vector operator vector
+    else if(type_left == 1 && type_right == 1){
         *ret_type = 1;
         if (operator == '*'){
             *ret_type = -1;
@@ -47,7 +54,9 @@ char* get_func_for_arithmetic_op(int type_left, int type_right, char operator, i
             return "v_v_sum";
         else
             return "v_v_min";
-    }else if(type_left== 0 && type_right == 0){
+    }
+    // scalar operator scalar
+    else if(type_left== 0 && type_right == 0){
         *ret_type = 0;
         if (operator == '*')
             return "s_s_mul";
@@ -55,22 +64,32 @@ char* get_func_for_arithmetic_op(int type_left, int type_right, char operator, i
             return "s_s_sum";
         else
             return "s_s_min";
-    }else if(operator == '*' && ((type_left == 2 && type_right == 0) ||
+    }
+    // matrix operator scalar or scalar operator matrix
+    else if(operator == '*' && ((type_left == 2 && type_right == 0) ||
                                     (type_left == 0 && type_right == 2))){
         *in_reverse = type_left == 0;
         *ret_type = 2;
         return "m_s_mul";
-    }else if(operator == '*' && ((type_left == 1 && type_right == 0) ||
+    }
+    // vector operator scalar or scalar operator vector
+    else if(operator == '*' && ((type_left == 1 && type_right == 0) ||
                                     (type_left == 0 && type_right == 1))){
         *in_reverse = type_left == 0;
         *ret_type = 1;
         return "v_s_mul";
-    }else{
+    }
+    // couldn't match var types
+    else{
         *ret_type = -1;
         return "";
     }
 }
 
+
+/*
+    Returns pointer at end of a expression in a choose func.
+*/
 char* get_inside_choose_expr_close(char *str){
     char *ptr = str;
     int p_level = 0; // paranthesis
@@ -91,11 +110,15 @@ char* get_inside_choose_expr_close(char *str){
         ++ptr;
     }
 }
-// out ret type: 0 scalar, 1 vector, 2 matrixx
+
+/*
+    Returns expression in C, return type of expr and dimensions.
+    out ret type: 0 scalar, 1 vector, 2 matrix
+*/
 char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
     trim(expr);
-    printf("Converting: %s\n", expr);
     
+    // a(* + -)b
     if(match_binary_arithmetic_expr(expr)){
         vector tokens = tokenize(expr, " *+-\n\t");
 
@@ -142,6 +165,7 @@ char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
             return throw_error();
         }
 
+        // special controls (mostly dimension checks) for different types of arithemtic operations.
         switch(type_left_int){
             case 2:
                 switch(type_right_int){
@@ -213,7 +237,9 @@ char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
         strcat(ret, ")");
         strcat(ret, "\0");
         return ret;
-    }else if(match_indexed_matrix(expr)){
+    }
+    // A[i,j]
+    else if(match_indexed_matrix(expr)){
         vector tokens = tokenize(expr, " [,]");
         // {var_name}.elements[{i}][{j}]
         char *ret = malloc(strlen(tokens.elements[0]) + 21 + strlen(tokens.elements[1]) + 14 + strlen(tokens.elements[2]) + 3);
@@ -227,7 +253,9 @@ char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
         *rows = 1;
         *cols = 1;
         return ret;
-    }else if(match_indexed_vector(expr)){
+    }
+    // v[i]
+    else if(match_indexed_vector(expr)){
         vector tokens = tokenize(expr, " [,]");
         // {var_name}.elements[{i}]
         char *ret = malloc(strlen(tokens.elements[0]) + 19 + strlen(tokens.elements[1]) + 7);
@@ -239,9 +267,17 @@ char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
         *rows = 1;
         *cols = 1;
         return ret;
-    }else if(match_var(expr)){
+    }
+    // x
+    else if(match_var(expr)){
         int index = -1;
         char *type = get_var_type_and_index(expr, &index);
+
+        if(index == -1){
+            // var not found.
+            return throw_error();
+        }
+        
         if(strcmp(type, "matrix") == 0){
             *rows = ((int *)vars.matrix_dimensions.elements[index])[0];
             *cols = ((int *)vars.matrix_dimensions.elements[index])[1];
