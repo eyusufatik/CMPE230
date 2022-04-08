@@ -159,7 +159,8 @@ char* make_assignment(char *line){
                 strcat(op, value);
                 strcat(op, ";\0");
                 vec_str_append(&set_ops, op);
-                // free(op);
+                free(op);
+                op = NULL;
             }
 
             size_t len = 0;
