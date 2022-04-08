@@ -453,9 +453,11 @@ char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
 
 
         char *expr2_close = get_inside_choose_expr_close(expr1_close+1);
-        size_t expr2_size = expr2_close - expr1_close-1;
+        printf("expr2 start: %s\n", expr1_close+1);
+        printf("expr2 close: %s\n", expr2_close);
+        size_t expr2_size = expr2_close - expr1_close;
         char *expr2 = malloc(expr2_size+10);
-        strncpy(expr2, expr1_close+1, expr2_size);
+        strncpy(expr2, expr1_close+1, expr2_size-1);
         strcat(expr2, "\0");
         printf("%s\n", expr2);
         type = -1;
