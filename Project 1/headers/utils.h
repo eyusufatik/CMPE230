@@ -98,6 +98,7 @@ vector tokenize(char *str, char *delimeter){
         vec_str_append(&tokens, token);
         token = strtok(NULL, delimeter);
     }
+    free(token);
     return tokens;
 }
 
