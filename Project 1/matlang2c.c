@@ -129,18 +129,21 @@ int main(int argc, char *argv[]){
 
     vector lines = vec_make_vector();
     while ((read = getline(&line_buf, &line_buf_size, matFile1)) != -1) {
-        if(strcmp(line_buf, "\n") != 0)
-            vec_str_append(&lines, line_buf);
+        vec_str_append(&lines, line_buf);
     }
 
 
     // convert each line to C
     for (int i = 0; i < lines.size; i++){
-        printf("%s", (char*)(lines.elements[i]));
+
+        if(is_empty(strdup(lines.elements[i]))){
+            continue;
+        }
+        // printf("%s", (char*)(lines.elements[i]));
         char *line_in_c = convert_line((char*)(lines.elements[i]));
 
         if(strcmp(line_in_c, "error") == 0){
-            printf("error at line (%d): \n", i);
+            printf("Error (Line %d)\n", i);
             break;
         }else if(strcmp(line_in_c, "comment") == 0 ){
 

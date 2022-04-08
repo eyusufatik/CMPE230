@@ -29,6 +29,7 @@ bool match_indexed_matrix(char *expr){
 
     int dummy = 0;
     char *type = get_var_type_and_index(var_name, &dummy);
+    free(var_name);
     return strcmp(type, "matrix") == 0;
     // vector tokens = tokenize(expr, "[,]\t");
     // if(tokens.size == 3){
@@ -57,6 +58,7 @@ bool match_indexed_vector(char *expr){
 
     int dummy = 0;
     char *type = get_var_type_and_index(var_name, &dummy);
+    free(var_name);
     return strcmp(type, "vector") == 0;
 }
 
