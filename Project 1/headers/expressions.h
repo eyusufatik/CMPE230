@@ -439,7 +439,7 @@ char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
         char *expr1 = malloc(expr1_size+10);
         strncpy(expr1, expr1_start, expr1_size);
         strcat(expr1, "\0");
-
+        printf("%s\n", expr1);
         int dummy = -1;
         int type = -1;
         char *expr1_in_c = convert_complex_expr(expr1, &type, &dummy, &dummy);
