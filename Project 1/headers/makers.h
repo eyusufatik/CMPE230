@@ -140,6 +140,7 @@ char* make_assignment(char *line){
         if(strcmp(type, "vector") == 0){
             // found in vectors
             if(((int **)vars.vector_dimensions.elements)[index][0] != tokens.size-1){
+
                 return throw_error();
             }
             vector set_ops = vec_make_vector();
@@ -173,6 +174,7 @@ char* make_assignment(char *line){
             for (int i = 1; i < set_ops.size; i++){
                 strcat(ret_line, set_ops.elements[i]);
             }
+
             return ret_line;
         }else if(strcmp(type, "matrix") == 0){
             // found in matrices;
@@ -204,7 +206,7 @@ char* make_assignment(char *line){
                     strcat(op, value);
                     strcat(op, ";\0");
                     vec_str_append(&set_ops, op);
-                    free(op);
+
                     op = NULL;
                 }
             }
@@ -247,7 +249,6 @@ char* make_assignment(char *line){
         strcat(line_in_c, " = ");
         strcat(line_in_c, expr_in_c);
         strcat(line_in_c, ";\0");
-        // free(expr_in_c);
         return line_in_c;
     }
 }
@@ -320,7 +321,7 @@ char *make_for(char *line, bool *double_for){
         
         if(type != 0){
             free(var_name);
-            free(expr1);
+            // free(expr1);
             return throw_error();
         }
 
@@ -328,13 +329,12 @@ char *make_for(char *line, bool *double_for){
         size_t expr2_size = expr2_close - expr1_close - 1;
         char *expr2 = malloc(expr2_size);
         strncpy(expr2, expr1_close + 1, expr2_size);
-        printf("\n\n%s\n\n", expr2);
         trim(expr2);
         char *expr2_in_c = convert_complex_expr(expr2, &type, &dummy, &dummy);
 
         if(type != 0){
-            free(expr1);
-            free(expr2);
+            // free(expr1);
+            // free(expr2);
             free(var_name);
             return throw_error();
         }
@@ -349,9 +349,9 @@ char *make_for(char *line, bool *double_for){
         if(type != 0){
             //free all
             free(var_name);
-            free(expr1);
-            free(expr2);
-            free(expr3);
+            // free(expr1);
+            // free(expr2);
+            // free(expr3);
             return throw_error();
         }
         
@@ -393,7 +393,7 @@ char *make_for(char *line, bool *double_for){
         
         
         //these free's are correct
-        free(var_name);free(expr1);free(expr2);free(expr3);
+        free(var_name); //free(expr1);free(expr2);free(expr3);
         free(for_var_part);free(bound_part);free(incr_part);
 
         return combined;
@@ -434,7 +434,7 @@ char *make_for(char *line, bool *double_for){
         char *expr1_in_c = convert_complex_expr(expr1, &type, &dummy, &dummy);
 
         if(type != 0){
-            free(var1);free(var2);free(expr1);
+            // free(var1);free(var2);free(expr1);
             return throw_error();   
         }
             
@@ -446,7 +446,7 @@ char *make_for(char *line, bool *double_for){
         char *expr2_in_c = convert_complex_expr(expr2, &type, &dummy, &dummy);
 
         if(type != 0){
-            free(var1);free(var2);free(expr1);free(expr2);
+            // free(var1);free(var2);free(expr1);free(expr2);
             return throw_error();
         }
             
@@ -459,7 +459,7 @@ char *make_for(char *line, bool *double_for){
         char *expr3_in_c = convert_complex_expr(expr3, &type, &dummy, &dummy);
 
         if(type != 0){
-            free(var1);free(var2);free(expr1);free(expr2);free(expr3);
+            // free(var1);free(var2);free(expr1);free(expr2);free(expr3);
             return throw_error();
         }
 
@@ -471,7 +471,7 @@ char *make_for(char *line, bool *double_for){
         char *expr4_in_c = convert_complex_expr(expr4, &type, &dummy, &dummy);
 
         if(type != 0) {
-            free(var1);free(var2);free(expr1);free(expr2);free(expr3);free(expr4);
+            // free(var1);free(var2);free(expr1);free(expr2);free(expr3);free(expr4);
             return throw_error();
         }
         
@@ -483,7 +483,7 @@ char *make_for(char *line, bool *double_for){
         char *expr5_in_c = convert_complex_expr(expr5, &type, &dummy, &dummy);
 
         if(type != 0){
-            free(var1);free(var2);free(expr1);free(expr2);free(expr3);free(expr4);free(expr5);
+            // free(var1);free(var2);free(expr1);free(expr2);free(expr3);free(expr4);free(expr5);
             return throw_error();
         }
         
@@ -495,7 +495,7 @@ char *make_for(char *line, bool *double_for){
         char *expr6_in_c = convert_complex_expr(expr6, &type, &dummy, &dummy);
 
         if(type != 0){
-            free(var1);free(var2);free(expr1);free(expr2);free(expr3);free(expr4);free(expr5);free(expr6);
+            // free(var1);free(var2);free(expr1);free(expr2);free(expr3);free(expr4);free(expr5);free(expr6);
             return throw_error();
         }
 
@@ -572,7 +572,25 @@ char *make_for(char *line, bool *double_for){
         strcpy(double_for, combined);
         strcat(double_for, combined2);
 
-        free(var1);free(var2);free(expr1);free(expr2);free(expr3);free(expr4);free(expr5);free(expr6);free(for_var_part);free(bound_part);free(incr_part);free(combined);free(for_var_part2);free(bound_part2);free(incr_part2);free(combined2);
+        free(var1);free(var2);free(expr1);free(expr2);free(expr3);free(expr4);free(expr5);free(expr6);free(for_var_part);
+        var1 = NULL;
+        var2 = NULL;
+        expr1 = NULL;
+        expr2 = NULL;
+        expr3 = NULL;
+        expr4 = NULL;
+        expr5 = NULL;
+        expr6 = NULL;
+        for_var_part = NULL;
+        free(bound_part);free(incr_part);free(combined);free(for_var_part2);free(bound_part2);free(incr_part2);free(combined2);
+
+        bound_part = NULL;
+        incr_part = NULL;
+        combined = NULL;
+        for_var_part2 = NULL;
+        bound_part2 = NULL;
+        incr_part2 = NULL;
+        combined2 = NULL;
         return double_for;
     }else{
         return throw_error();

@@ -102,6 +102,16 @@ vector tokenize(char *str, char *delimeter){
     return tokens;
 }
 
+
+int is_empty(const char *s) {
+  while (*s != '\0') {
+    if (!isspace((unsigned char)*s))
+      return 0;
+    s++;
+  }
+  return 1;
+}
+
 /*
     Returns var type and index of the var in the vars struct vector.
 */

@@ -163,6 +163,7 @@ char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
         strcpy(func_name, get_func_for_arithmetic_op(type_left_int, type_right_int, operator, &out_type, &in_reverse));
         *ret_type = out_type;
         if(out_type == -1){
+            free(func_name);
             return throw_error();
         }
 
@@ -282,7 +283,6 @@ char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
         if(strcmp(type, "matrix") == 0){
             *rows = ((int *)vars.matrix_dimensions.elements[index])[0];
             *cols = ((int *)vars.matrix_dimensions.elements[index])[1];
-            printf("%d %d\n", *rows, *cols);
         }else if(strcmp(type, "vector") == 0){
             *rows = ((int *)vars.vector_dimensions.elements[index])[0];
             *cols = 1;
@@ -331,12 +331,20 @@ char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
 
                 // if any of the expressions is vector/matrix check dimensions
                 if(left_type != 0 || right_type != 0){
-                    if((c == '+' || c == '-') && (left_rows != right_rows || left_cols != right_cols))
+                    if((c == '+' || c == '-') && (left_rows != right_rows || left_cols != right_cols)){
+                        free(left_in_c);
+                        free(right_in_c);
+                        // free(left);
+                        // free(right);
                         return throw_error();
-                    else if(c == '*' && left_cols != right_rows)
+                    }else if(c == '*' && left_cols != right_rows){
+                        free(left_in_c);
+                        free(right_in_c);
+                        // free(left);
+                        // free(right);
                         return throw_error();
+                    }
                 }
-        printf("%s %d %d %d %d\n", expr, left_rows, left_cols, right_rows, right_cols);
 
                 if(c == '*'){
                     *rows = left_rows;
@@ -360,8 +368,7 @@ char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
                 strcat(ret, right_in_c);
                 strcat(ret, ")");
                 // printf("%s", ret);
-                // free(left);
-                // free(right);
+                free(left); free(right); free(left_in_c); free(right_in_c); free(func_name);
                 return ret;
             }
         }
@@ -392,7 +399,6 @@ char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
         strncpy(inside, first+1, last-first-1);
         int inside_type = 0;
         char *inside_in_c = convert_complex_expr(inside, &inside_type, rows, cols);
-        printf("%s: %d %d\n",inside, *rows, *cols);
         *ret_type = inside_type;
         if(strncmp(expr, "tr(", 3) == 0){
             int temp = *rows;
@@ -404,8 +410,10 @@ char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
                 return inside_in_c;
             }
         }
-        if(strncmp(expr, "sqrt(", 5) == 0 && inside_type != 0)
+        if(strncmp(expr, "sqrt(", 5) == 0 && inside_type != 0){
+            // free(inside);
             return throw_error();
+        }
         char *ret = malloc(first - expr + strlen(inside_in_c) + 3);
         strncpy(ret, expr, first-expr);
         if(inside_type == 1){
@@ -413,9 +421,7 @@ char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
         }
         strcat(ret, "(");
         strcat(ret, inside_in_c);
-        printf("inside in c: %s\n", inside_in_c);
         strcat(ret, ")");
-        printf("match_func: %s\n", ret);
         // strcat(ret, ")");
         // free(first);
         // free(last);
@@ -426,17 +432,23 @@ char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
     // choose(<expr_list>)
     else if(match_choose(expr)){
         char *expr1_start = strchr(expr, '(')+1;
+
         char *expr1_close = get_inside_choose_expr_close(expr1_start);
+
         size_t expr1_size = expr1_close - expr1_start;
-        char *expr1 = malloc(expr1_size);
+        char *expr1 = malloc(expr1_size+10);
         strncpy(expr1, expr1_start, expr1_size);
+        strcat(expr1, "\0");
 
         int dummy = -1;
         int type = -1;
         char *expr1_in_c = convert_complex_expr(expr1, &type, &dummy, &dummy);
         
-        if(type != 0)
+        if(type != 0){
+            // free(expr1);s
             return throw_error();
+        }
+        
 
 
         char *expr2_close = get_inside_choose_expr_close(expr1_close+1);
@@ -446,8 +458,11 @@ char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
 
         type = -1;
         char *expr2_in_c = convert_complex_expr(expr2, &type, &dummy, &dummy);
-        if(type != 0)
+        if(type != 0){
+            // free(expr1);
+            // free(expr2);
             return throw_error();
+        }
 
 
         char *expr3_close = get_inside_choose_expr_close(expr2_close+1);
@@ -457,8 +472,12 @@ char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
 
         type = -1;
         char *expr3_in_c = convert_complex_expr(expr3, &type, &dummy, &dummy);
-        if(type != 0)
+        if(type != 0){
+            // free(expr1);
+            // free(expr2);
+            // free(expr3);
             return throw_error();
+        }
 
         
         char *expr4_close = strrchr(expr3_close, ')')-1;
@@ -468,8 +487,13 @@ char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
 
         type = -1;
         char *expr4_in_c = convert_complex_expr(expr4, &type, &dummy, &dummy);
-        if(type != 0)
+        if(type != 0){
+            // free(expr1);
+            // free(expr2);
+            // free(expr3);
+            // free(expr4);
             return throw_error();
+        }
 
         // choose({expr1c}, {expr2c}, {expr3c}, {expr4c})
         char *ret = malloc(7 + strlen(expr1_in_c) + 2 + strlen(expr2_in_c) + 2 + strlen(expr3_in_c) + 2 + strlen(expr4_in_c) + 2);
@@ -484,9 +508,12 @@ char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
         strcat(ret, ")\0");
         *rows = 1;
         *cols = 1;
+        // free(expr1);
+        // free(expr2);
+        // free(expr3);
+        // free(expr4);
         return ret;
     }
-    printf("cannot match: %s\n", expr);
     return "not imp of complex expr";
 }
 
