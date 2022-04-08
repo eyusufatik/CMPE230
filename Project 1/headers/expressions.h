@@ -456,6 +456,7 @@ char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
         size_t expr2_size = expr2_close - expr1_close-1;
         char *expr2 = malloc(expr2_size+10);
         strncpy(expr2, expr1_close+1, expr2_size);
+        strcat(expr2, "\0");
         printf("%s\n", expr2);
         type = -1;
         char *expr2_in_c = convert_complex_expr(expr2, &type, &dummy, &dummy);
@@ -472,6 +473,7 @@ char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
         size_t expr3_size = expr3_close - expr2_close-1;
         char *expr3 = malloc(expr3_size+10);
         strncpy(expr3, expr2_close+1, expr3_size);
+        strcat(expr3, "\0");
 
         type = -1;
         char *expr3_in_c = convert_complex_expr(expr3, &type, &dummy, &dummy);
@@ -489,6 +491,7 @@ char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
         size_t expr4_size = expr4_close - expr3_close;
         char *expr4 = malloc(expr4_size+10);
         strncpy(expr4, expr3_close+1, expr4_size);
+        strcat(expr4, "\0");
 
         type = -1;
         char *expr4_in_c = convert_complex_expr(expr4, &type, &dummy, &dummy);
