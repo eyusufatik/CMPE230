@@ -136,7 +136,7 @@ int main(int argc, char *argv[]){
 
     // convert each line to C
     for (int i = 0; i < lines.size; i++){
-        printf("%s", (char*)(lines.elements[i]));
+        // printf("%s", (char*)(lines.elements[i]));
         char *line_in_c = convert_line((char*)(lines.elements[i]));
 
         if(strcmp(line_in_c, "error") == 0){

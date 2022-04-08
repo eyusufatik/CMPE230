@@ -159,6 +159,7 @@ char* make_assignment(char *line){
                 strcat(op, value);
                 strcat(op, ";\0");
                 vec_str_append(&set_ops, op);
+                // check this
                 free(op);
                 op = NULL;
             }
@@ -203,7 +204,8 @@ char* make_assignment(char *line){
                     strcat(op, value);
                     strcat(op, ";\0");
                     vec_str_append(&set_ops, op);
-                    // free(op);
+                    free(op);
+                    op = NULL;
                 }
             }
             size_t len = 0;
@@ -235,6 +237,8 @@ char* make_assignment(char *line){
         int right_cols = -1;
         char *expr_in_c = convert_complex_expr(rhs, &right_type, &right_rows, &right_cols);
         if(left_rows != right_rows || left_cols != right_cols){
+            free(rhs);
+            free(lhs);
             return throw_error();
         }
         
