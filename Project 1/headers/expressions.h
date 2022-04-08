@@ -446,6 +446,7 @@ char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
         
         if(type != 0){
             // free(expr1);s
+            printf("exp1 check\n");
             return throw_error();
         }
         
@@ -461,6 +462,8 @@ char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
         if(type != 0){
             // free(expr1);
             // free(expr2);
+            printf("exp2 check\n");
+
             return throw_error();
         }
 
@@ -476,6 +479,8 @@ char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
             // free(expr1);
             // free(expr2);
             // free(expr3);
+            printf("exp3 check\n");
+
             return throw_error();
         }
 
@@ -492,6 +497,8 @@ char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
             // free(expr2);
             // free(expr3);
             // free(expr4);
+            printf("exp4 check\n");
+
             return throw_error();
         }
 
