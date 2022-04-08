@@ -430,10 +430,11 @@ char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
         size_t expr1_size = expr1_close - expr1_start;
         char *expr1 = malloc(expr1_size);
         strncpy(expr1, expr1_start, expr1_size);
-        
+
         int dummy = -1;
         int type = -1;
         char *expr1_in_c = convert_complex_expr(expr1, &type, &dummy, &dummy);
+        
         if(type != 0)
             return throw_error();
 

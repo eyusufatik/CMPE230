@@ -237,8 +237,8 @@ char* make_assignment(char *line){
         int right_cols = -1;
         char *expr_in_c = convert_complex_expr(rhs, &right_type, &right_rows, &right_cols);
         if(left_rows != right_rows || left_cols != right_cols){
-            free(rhs);
-            free(lhs);
+            // free(rhs);
+            // free(lhs);
             return throw_error();
         }
         
@@ -328,6 +328,7 @@ char *make_for(char *line, bool *double_for){
         size_t expr2_size = expr2_close - expr1_close - 1;
         char *expr2 = malloc(expr2_size);
         strncpy(expr2, expr1_close + 1, expr2_size);
+        printf("\n\n%s\n\n", expr2);
         trim(expr2);
         char *expr2_in_c = convert_complex_expr(expr2, &type, &dummy, &dummy);
 
