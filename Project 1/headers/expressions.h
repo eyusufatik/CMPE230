@@ -457,8 +457,8 @@ char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
         printf("expr2 close: %s\n", expr2_close);
         size_t expr2_size = expr2_close - expr1_close-1;
         printf("expr2 size: %d\n", expr2_size);
-
         char *expr2 = malloc(expr2_size+10);
+        *expr2 = '\0';
         strncpy(expr2, expr1_close+1, expr2_size);
         strcat(expr2, "\0");
         printf("%s\n", expr2);
