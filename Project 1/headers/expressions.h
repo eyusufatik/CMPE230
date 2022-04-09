@@ -461,6 +461,7 @@ char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
         char *expr2 = calloc(expr2_size+1, 1);
         strncpy(expr2, expr1_close+1, expr2_size);
         strcat(expr2, "\0");
+        printf("strlen: %d\n", strlen(expr2));
         printf("%s\n", expr2);
         type = -1;
         char *expr2_in_c = convert_complex_expr(expr2, &type, &dummy, &dummy);
