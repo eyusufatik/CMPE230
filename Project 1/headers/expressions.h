@@ -436,10 +436,11 @@ char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
         char *expr1_close = get_inside_choose_expr_close(expr1_start);
 
         size_t expr1_size = expr1_close - expr1_start;
-        char *expr1 = malloc(expr1_size+10);
+        printf("%d\n", expr1_size);
+        char *expr1 = calloc(expr1_size+1, 1);
         strncpy(expr1, expr1_start, expr1_size);
         strcat(expr1, "\0");
-        printf("%s\n", expr1);
+        printf("%s %d\n", expr1, strlen(expr1));
         int dummy = -1;
         int type = -1;
         char *expr1_in_c = convert_complex_expr(expr1, &type, &dummy, &dummy);
@@ -457,8 +458,7 @@ char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
         printf("expr2 close: %s\n", expr2_close);
         size_t expr2_size = expr2_close - expr1_close-1;
         printf("expr2 size: %d\n", expr2_size);
-        char *expr2 = malloc(expr2_size+10);
-        *expr2 = '\0';
+        char *expr2 = calloc(expr2_size+1, 1);
         strncpy(expr2, expr1_close+1, expr2_size);
         strcat(expr2, "\0");
         printf("%s\n", expr2);
@@ -475,7 +475,7 @@ char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
 
         char *expr3_close = get_inside_choose_expr_close(expr2_close+1);
         size_t expr3_size = expr3_close - expr2_close;
-        char *expr3 = malloc(expr3_size+10);
+        char *expr3 = calloc(expr3_size+1, 1);
         strncpy(expr3, expr2_close+1, expr3_size-1);
         strcat(expr3, "\0");
 
@@ -493,7 +493,7 @@ char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
         
         char *expr4_close = strrchr(expr3_close, ')')-1;
         size_t expr4_size = expr4_close - expr3_close;
-        char *expr4 = malloc(expr4_size+10);
+        char *expr4 = calloc(expr4_size+1, 1);
         strncpy(expr4, expr3_close+1, expr4_size);
         strcat(expr4, "\0");
 
