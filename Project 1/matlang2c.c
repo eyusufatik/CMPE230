@@ -111,7 +111,11 @@ int main(int argc, char *argv[]){
     FILE *fp;
     FILE *output_header;
     char *file_name = strdup(argv[1]);
-    char *pure_file_name = strtok(file_name, ".");
+    char *out_file_name_end = strstr(file_name, ".mat");
+    size_t out_file_name_size = out_file_name_end - file_name;
+    char *pure_file_name = malloc(out_file_name_size + 1);
+    strncpy(pure_file_name, file_name, out_file_name_size);
+    strcat(pure_file_name, "\0");
     strcat(pure_file_name, ".c");
     fp = fopen(pure_file_name, "w");
     output_header = fopen("output_header.h", "r");

@@ -472,9 +472,9 @@ char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
 
 
         char *expr3_close = get_inside_choose_expr_close(expr2_close+1);
-        size_t expr3_size = expr3_close - expr2_close-1;
+        size_t expr3_size = expr3_close - expr2_close;
         char *expr3 = malloc(expr3_size+10);
-        strncpy(expr3, expr2_close+1, expr3_size);
+        strncpy(expr3, expr2_close+1, expr3_size-1);
         strcat(expr3, "\0");
 
         type = -1;
