@@ -45,7 +45,7 @@ out_matrix make_out_matrix(size_t rows, size_t cols){
 }
 
 void print_sep() {
-    printf("----------\n");
+    printf("------------\n");
 }
 
 void my_print_s(float s) {
