@@ -23,7 +23,7 @@ void print_float(float x){
     if(fabs(x - round(x)) < EPSILON)
         printf("%d\n", my_round(x));
     else
-        printf("%.7f\n", x);
+        printf("%.6f\n", x);
 }
 
 // out_vector make_out_vector(size_t size){
