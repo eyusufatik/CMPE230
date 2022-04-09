@@ -436,39 +436,32 @@ char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
         char *expr1_close = get_inside_choose_expr_close(expr1_start);
 
         size_t expr1_size = expr1_close - expr1_start;
-        printf("%d\n", expr1_size);
         char *expr1 = calloc(expr1_size+1, 1);
         strncpy(expr1, expr1_start, expr1_size);
         strcat(expr1, "\0");
-        printf("%s %d\n", expr1, strlen(expr1));
         int dummy = -1;
         int type = -1;
         char *expr1_in_c = convert_complex_expr(expr1, &type, &dummy, &dummy);
         
         if(type != 0){
             // free(expr1);s
-            printf("exp1 check\n");
+            // printf("exp1 check\n");
             return throw_error();
         }
         
 
 
         char *expr2_close = get_inside_choose_expr_close(expr1_close+1);
-        printf("expr2 start: %s\n", expr1_close+1);
-        printf("expr2 close: %s\n", expr2_close);
         size_t expr2_size = expr2_close - expr1_close-1;
-        printf("expr2 size: %d\n", expr2_size);
         char *expr2 = calloc(expr2_size+1, 1);
         strncpy(expr2, expr1_close+1, expr2_size);
         strcat(expr2, "\0");
-        printf("strlen: %d\n", strlen(expr2));
-        printf("%s\n", expr2);
         type = -1;
         char *expr2_in_c = convert_complex_expr(expr2, &type, &dummy, &dummy);
         if(type != 0){
             // free(expr1);
             // free(expr2);
-            printf("exp2 check\n");
+            // printf("exp2 check\n");
 
             return throw_error();
         }
@@ -486,7 +479,7 @@ char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
             // free(expr1);
             // free(expr2);
             // free(expr3);
-            printf("exp3 check\n");
+            // printf("exp3 check\n");
 
             return throw_error();
         }
@@ -505,7 +498,7 @@ char* convert_complex_expr(char *expr, int *ret_type, int *rows, int *cols){
             // free(expr2);
             // free(expr3);
             // free(expr4);
-            printf("exp4 check\n");
+            // printf("exp4 check\n");
 
             return throw_error();
         }
