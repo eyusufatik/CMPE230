@@ -113,7 +113,7 @@ int main(int argc, char *argv[]){
     char *file_name = strdup(argv[1]);
     char *out_file_name_end = strstr(file_name, ".mat");
     size_t out_file_name_size = out_file_name_end - file_name;
-    char *pure_file_name = malloc(out_file_name_size + 1);
+    char *pure_file_name = malloc(out_file_name_size + 3);
     strncpy(pure_file_name, file_name, out_file_name_size);
     strcat(pure_file_name, "\0");
     strcat(pure_file_name, ".c");
@@ -167,6 +167,7 @@ int main(int argc, char *argv[]){
     fprintf(fp, "%s\n", "}");
     //  Free the allocated line buffer
     free(line_buf);
+    free(pure_file_name);
     line_buf = NULL;
 
     //  Close the file now that we are done with it
