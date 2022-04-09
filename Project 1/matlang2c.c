@@ -109,8 +109,17 @@ int main(int argc, char *argv[]){
     // open up file to read and write to.
     FILE *matFile1;
     FILE *fp;
-    fp = fopen("output.c", "w");
-    fprintf(fp, "%s\n%s\n", "#include \"output_header.h\"", "int main(){");
+    FILE *output_header;
+    char *file_name = strdup(argv[1]);
+    char *pure_file_name = strtok(file_name, ".");
+    strcat(pure_file_name, ".c");
+    fp = fopen(pure_file_name, "w");
+    output_header = fopen("output_header.h", "r");
+    char ch;
+    while ((ch = fgetc(output_header)) != EOF){
+        fputc(ch, fp);
+    }
+    fprintf(fp, "%s\n%s\n", "int main(){");
     if(argc > 1){
         matFile1 = fopen(argv[1], "r");
         if(matFile1 == NULL){
@@ -143,7 +152,7 @@ int main(int argc, char *argv[]){
         char *line_in_c = convert_line((char*)(lines.elements[i]));
 
         if(strcmp(line_in_c, "error") == 0){
-            printf("Error (Line %d)\n", i);
+            printf("Error (Line %d)\n", i+1);
             break;
         }else if(strcmp(line_in_c, "comment") == 0 ){
 
