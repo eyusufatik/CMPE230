@@ -117,7 +117,6 @@ int main(int argc, char *argv[]){
     strncpy(pure_file_name, file_name, out_file_name_size);
     strcat(pure_file_name, ".c");
     strcat(pure_file_name, "\0");
-    printf("%s\n", pure_file_name);
     fp = fopen(pure_file_name, "w");
     output_header = fopen("output_header.h", "r");
     char ch;
