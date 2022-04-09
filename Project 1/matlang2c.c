@@ -115,15 +115,16 @@ int main(int argc, char *argv[]){
     size_t out_file_name_size = out_file_name_end - file_name;
     char *pure_file_name = malloc(out_file_name_size + 3);
     strncpy(pure_file_name, file_name, out_file_name_size);
-    strcat(pure_file_name, "\0");
     strcat(pure_file_name, ".c");
+    strcat(pure_file_name, "\0");
+    printf("%s\n", pure_file_name);
     fp = fopen(pure_file_name, "w");
     output_header = fopen("output_header.h", "r");
     char ch;
     while ((ch = fgetc(output_header)) != EOF){
         fputc(ch, fp);
     }
-    fprintf(fp, "%s\n%s\n", "int main(){");
+    fprintf(fp, "%s\n", "int main(){");
     if(argc > 1){
         matFile1 = fopen(argv[1], "r");
         if(matFile1 == NULL){
