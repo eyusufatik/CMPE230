@@ -23,7 +23,7 @@ void print_float(float x){
     if(fabs(x - round(x)) < EPSILON)
         printf("%d\n", my_round(x));
     else
-        printf("%.7f\n", x);
+        printf("%.6f\n", x);
 }
 
 // out_vector make_out_vector(size_t size){
@@ -45,7 +45,7 @@ out_matrix make_out_matrix(size_t rows, size_t cols){
 }
 
 void print_sep() {
-    printf("----------\n");
+    printf("------------\n");
 }
 
 void my_print_s(float s) {
@@ -61,8 +61,13 @@ void my_print_v(out_matrix v) {
 void my_print_m(out_matrix m) {
     for(int i=0; i<m.rows; i++){
         for(int j=0; j<m.cols; j++){
-            print_float(m.elements[i][j]);
+            float x = m.elements[i][j];
+            if(fabs(x - round(x)) < EPSILON)
+                printf("%d ", my_round(x));
+            else
+                printf("%.6f ", x);
         }
+        printf("\n");
     }
 }
 
@@ -206,7 +211,6 @@ float choose(float x, float y, float z, float t){
 }
 
 int main(){
-
 out_matrix z = make_out_matrix(3, 1);
 out_matrix y = make_out_matrix(4, 1);
 out_matrix A = make_out_matrix(2, 2);

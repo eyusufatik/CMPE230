@@ -61,8 +61,13 @@ void my_print_v(out_matrix v) {
 void my_print_m(out_matrix m) {
     for(int i=0; i<m.rows; i++){
         for(int j=0; j<m.cols; j++){
-            print_float(m.elements[i][j]);
+            float x = m.elements[i][j];
+            if(fabs(x - round(x)) < EPSILON)
+                printf("%d ", my_round(x));
+            else
+                printf("%.6f ", x);
         }
+        printf("\n");
     }
 }
 
