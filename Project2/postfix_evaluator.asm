@@ -142,20 +142,14 @@ output: ; this is also from PS
     div bx ; divide the number to 10d in order to take the last digit of it seperately
     push dx ; push the remainder -last digit of num- to stack
     add cx, 1h ; c++, to know number of digits that will be in stack ; inc
-    cmp ax, 0h ; if the quotient is 0, there is nothing more to divide, jump to finish
-        je outputFinish
     mov dx, 0h ; make it 0, just in case
     div bx ; same process again, if the quotient is not 0
     push dx
     add cx, 1h ; inc
-    cmp ax, 0h
-        je outputFinish
     mov dx, 0h
     div bx ; same process again, if the quotient is not 0
     push dx
     add cx, 1h ; inc
-    cmp ax, 0h
-        je outputFinish
     push ax ; if there is a last digit, push it to stack
     add cx, 1h ; inc
     jmp outputFinish
