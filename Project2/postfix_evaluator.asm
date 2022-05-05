@@ -1,10 +1,10 @@
-;    Algorithm for evaluating a postfix expression:
+;    Algorithm for evaluating a postfix expresdion:
 ;    1. Create a stack.
 ;    2. Scan the input starting from left.
 ;    3. If input is a hex number, push it to stack.
 ;    4. If input is operator, pop last two from stack and evaluate with operator.
 ;
-;    Source: https://www.geeksforgeeks.org/stack-set-4-evaluation-postfix-expression/
+;    Source: https://www.geeksforgeeks.org/stack-set-4-evaluation-postfix-expresdion/
 
 ;    Authors: Esad Yusuf Atik, Orkun Mahir Kılıç
 
@@ -13,12 +13,12 @@ code segment
     mov bx, 0h
     mov cx, 0h
     mov dx, 0h
-    mov si, 0h ; if si = 0, last input was an operation. Otherwise last input was a number.    
+    mov di, 0h ; if di = 0, last input was an operation. Otherwise last input was a number.    
     jmp readInput ; jumps to readInput
 
 ; <-- STACK -->
 pushToStack:
-    cmp si, 0h ; if operator -> then read input
+    cmp di, 0h ; if operator -> then read input
         je readInput
     push bx ; push input to stack
     mov bx, 0h ; clear bx
@@ -31,7 +31,7 @@ addLastTwo:
     pop bx ; take the top of stack
     add ax, bx ; add them
     push ax ; push it to stack
-    mov si, 0h
+    mov di, 0h
     mov bx, 0h
     jmp readInput
 
@@ -42,7 +42,7 @@ multiplyLastTwo:
     mul bx ; multiply them
     push ax ; push back to stack
     mov dx, 0h ; make dx zero, just in case
-    mov si, 0h
+    mov di, 0h
     mov bx, 0h
     jmp readInput
 
@@ -53,7 +53,7 @@ divideLastTwo:
     div bx ; divide ax by bx
     push ax ; push the result to the stack
     mov dx, 0h ; make dx zero, just in case
-    mov si, 0h
+    mov di, 0h
     mov bx, 0h
     jmp readInput
 
@@ -62,7 +62,7 @@ xorLastTwo:
     pop bx ; take the top of stack
     xor ax, bx ; xor operation
     push ax ; push the result in stack
-    mov si, 0h
+    mov di, 0h
     mov bx, 0h
     jmp readInput
 
@@ -71,7 +71,7 @@ andLastTwo:
     pop bx ; take the top of stack
     and ax, bx ; and operation
     push ax ; push the result in stack
-    mov si, 0h
+    mov di, 0h
     mov bx, 0h
     jmp readInput
 
@@ -80,7 +80,7 @@ orLastTwo:
     pop bx ; take the top of stack
     or ax, bx ; or operation
     push ax ; push the result in stack
-    mov si, 0h
+    mov di, 0h
     mov bx, 0h
     jmp readInput
 ; <-- OPERATIONS -->
@@ -107,7 +107,7 @@ readInput:
         je orLastTwo
     cmp al, 0Dh  ; if enter
         je output
-    mov si, 01h  ; this is like else (input is not one of the operators)
+    mov di, 01h  ; this is like else (input is not one of the operators)
     cmp al, 3ah  ; 3ah is the first ascii char after numbers
         jg inputToNumber
     sub al, '0'  ; ascii to value
