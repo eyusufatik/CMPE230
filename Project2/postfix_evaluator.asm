@@ -27,58 +27,60 @@ pushToStack:
 
 ; <-- OPERATIONS -->
 addLastTwo:
-    mov si, 0h
     pop ax ; take the top of stack
     pop bx ; take the top of stack
     add ax, bx ; add them
     push ax ; push it to stack
+    mov si, 0h
     mov bx, 0h
     jmp readInput
 
 multiplyLastTwo:
-    mov dx, 0h ; make dx zero, just in case
-    mov si, 0h
     pop ax ; take the top of stack
     pop bx ; take the top of stack
+    mov dx, 0h ; make dx zero, just in case
     mul bx ; multiply them
     push ax ; push back to stack
+    mov dx, 0h ; make dx zero, just in case
+    mov si, 0h
     mov bx, 0h
     jmp readInput
 
 divideLastTwo:
-    mov dx, 0h ; make dx zero, just in case
-    mov si, 0h
     pop bx ; take the top of stack
     pop ax ; take the top of stack
+    mov dx, 0h ; make dx zero, just in case
     div bx ; divide ax by bx
     push ax ; push the result to the stack
+    mov dx, 0h ; make dx zero, just in case
+    mov si, 0h
     mov bx, 0h
     jmp readInput
 
 xorLastTwo:
-    mov si, 0h
     pop ax ; take the top of stack
     pop bx ; take the top of stack
     xor ax, bx ; xor operation
     push ax ; push the result in stack
+    mov si, 0h
     mov bx, 0h
     jmp readInput
 
 andLastTwo:
-    mov si, 0h
     pop ax ; take the top of stack
     pop bx ; take the top of stack
     and ax, bx ; and operation
     push ax ; push the result in stack
+    mov si, 0h
     mov bx, 0h
     jmp readInput
 
 orLastTwo:
-    mov si, 0h
     pop ax ; take the top of stack
     pop bx ; take the top of stack
     or ax, bx ; or operation
     push ax ; push the result in stack
+    mov si, 0h
     mov bx, 0h
     jmp readInput
 ; <-- OPERATIONS -->
@@ -89,6 +91,8 @@ readInput:
     mov ah, 01h  
     int 21h     
     ; end of input reading (al is now input)
+    cmp al, 20h  ; if ' '
+        je pushToStack
     cmp al, 2Bh  ; if +
         je addLastTwo
     cmp al, 2Ah  ; if *
@@ -103,8 +107,6 @@ readInput:
         je orLastTwo
     cmp al, 0Dh  ; if enter
         je output
-    cmp al, 20h  ; if ' '
-        je pushToStack
     mov si, 01h  ; this is like else (input is not one of the operators)
     cmp al, 3ah  ; 3ah is the first ascii char after numbers
         jg inputToNumber
