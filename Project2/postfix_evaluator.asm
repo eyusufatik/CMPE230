@@ -27,60 +27,58 @@ pushToStack:
 
 ; <-- OPERATIONS -->
 addLastTwo:
+    mov si, 0h
     pop ax ; take the top of stack
     pop bx ; take the top of stack
     add ax, bx ; add them
     push ax ; push it to stack
-    mov si, 0h
     mov bx, 0h
     jmp readInput
 
 multiplyLastTwo:
-    pop ax ; take the top of stack
-    pop bx ; take the top of stack
-    mov dx, 0h ; make dx zero, just in case
-    mul bx ; multiply them
-    push ax ; push back to stack
     mov dx, 0h ; make dx zero, just in case
     mov si, 0h
+    pop ax ; take the top of stack
+    pop bx ; take the top of stack
+    mul bx ; multiply them
+    push ax ; push back to stack
     mov bx, 0h
     jmp readInput
 
 divideLastTwo:
-    pop bx ; take the top of stack
-    pop ax ; take the top of stack
-    mov dx, 0h ; make dx zero, just in case
-    div bx ; divide ax by bx
-    push ax ; push the result to the stack
     mov dx, 0h ; make dx zero, just in case
     mov si, 0h
+    pop bx ; take the top of stack
+    pop ax ; take the top of stack
+    div bx ; divide ax by bx
+    push ax ; push the result to the stack
     mov bx, 0h
     jmp readInput
 
 xorLastTwo:
+    mov si, 0h
     pop ax ; take the top of stack
     pop bx ; take the top of stack
     xor ax, bx ; xor operation
     push ax ; push the result in stack
-    mov si, 0h
     mov bx, 0h
     jmp readInput
 
 andLastTwo:
+    mov si, 0h
     pop ax ; take the top of stack
     pop bx ; take the top of stack
     and ax, bx ; and operation
     push ax ; push the result in stack
-    mov si, 0h
     mov bx, 0h
     jmp readInput
 
 orLastTwo:
+    mov si, 0h
     pop ax ; take the top of stack
     pop bx ; take the top of stack
     or ax, bx ; or operation
     push ax ; push the result in stack
-    mov si, 0h
     mov bx, 0h
     jmp readInput
 ; <-- OPERATIONS -->
