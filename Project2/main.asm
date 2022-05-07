@@ -137,21 +137,21 @@ output: ; this is also from PS
     ; end of output interrupt
     pop ax ; start popping the results
     mov bx, 10h ; div uses bx
-    mov si, 0h
+    mov cx, 0h
     mov dx, 0h ; clear the registers
     div bx ; remainder is in dx now, it is the last digit
     push dx ; push to output later
-    add si, 1h ; cx is used for counting the digits in the stack
+    add cx, 1h ; cx is used for counting the digits in the stack
     mov dx, 0h ; clear the remainder (todo:: think about removing)
     div bx ; next digit is in remainder now
     push dx
-    add si, 1h ; count the digits
+    add cx, 1h ; count the digits
     mov dx, 0h
     div bx ; next digit is in remainder now
     push dx
-    add si, 1h ; count the digits
+    add cx, 1h ; count the digits
     push ax ; this must be the last digit, push it
-    add si, 1h ; count the digits
+    add cx, 1h ; count the digits
     jmp outputFinish
 
 outputFinish:
@@ -163,7 +163,7 @@ outputFinish:
 
 outputContinue:
     int 21h ; start interrupt
-    sub si, 1h ; number of digit is decreased
+    sub cx, 1h ; number of digit is decreased
     jnz outputFinish ; if there are still digits, go to outputContinue
     int 20h ; end interrupt
 
