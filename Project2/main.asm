@@ -113,7 +113,7 @@ readInput:
     cmp al, 5EH ; if it is '^'
         je xorLastTwo
     cmp al, 0DH ; if input is ended completely -> '\n'(enter)
-        je output
+        je prepareOutput
     mov di, 01H ; this is like else (input is not one of the operators)
     cmp al, 3aH ; 3ah is the first ascii char after numbers
         jg inputToNumber ; jg because if it is bigger than 3ah, it is a number
@@ -136,7 +136,7 @@ multiDigitNumber: ; this part is from PS
 
 
 ; <-- OUTPUT -->
-output: ; this is also from PS
+prepareOutput: ; this is also from PS
     ; output interrupt
     mov ah, 02H
     mov dl, 10D ; \n
@@ -155,9 +155,9 @@ output: ; this is also from PS
     div bx ; next digit is in remainder now
     push dx
     push ax ; this must be the last digit, push
-    jmp outputFinish
+    jmp output
 
-outputFinish:
+output:
     mov ah, 02H ; start outputting
     pop dx ; this is the first digit
     cmp dl, 9H ; if it is not a number
@@ -167,7 +167,7 @@ outputFinish:
 outputContinue:
     int 21H ; start interrupt
     sub si, 1H ; number of digit is decreased
-    jnz outputFinish ; if there are still digits, go to outputContinue
+    jnz output ; if there are still digits, go to outputContinue
     int 20H ; end interrupt
 
 hexToOutput: ; hex to ascii; this is from PS
