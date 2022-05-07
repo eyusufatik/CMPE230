@@ -18,49 +18,6 @@ code segment ; initialize all registers, di is used to determine input's type
     mov si, 0h
     jmp readInput
 
-; <-- INPUT -->
-readInput:
-    ; input reading interrupt
-    mov ah, 01h  
-    int 21h     
-    ; end of input reading (al is now input)
-    cmp al, 20h ; if operator / input is ended -> ' '
-        je pushToStack
-    cmp al, 2Bh ; if it is '+'
-        je addLastTwo
-    cmp al, 2Fh ; if it is '/'
-        je divideLastTwo
-    cmp al, 2Ah ; if it is '*'
-        je multiplyLastTwo
-    cmp al, 26h ; if it is '&'
-        je andLastTwo
-    cmp al, 7Ch ; if it is '|'
-        je orLastTwo
-    cmp al, 5Eh ; if it is '^'
-        je xorLastTwo
-    cmp al, 0Dh ; if input is ended completely -> '\n'(enter)
-        je output
-    mov di, 01h ; this is like else (input is not one of the operators)
-    cmp al, 3ah ; 3ah is the first ascii char after numbers
-        jg inputToNumber ; jg because if it is bigger than 3ah, it is a number
-    sub al, '0'  ; convert ascii to mathematical number
-    jmp multiDigitNumber ; number is like '123'
-
-inputToNumber: ; this part is from PS
-    sub al, "A"
-    add al, 10d
-    jmp multiDigitNumber
-
-multiDigitNumber: ; this part is from PS
-    mov cx, 0h
-    mov cl, al ; cl is the first digit
-    mov ax, 10h ; ax = 10h because mul uses ax
-    mul bx ; if there is first digit, multiply it with 10 ; else it results in 0
-    add cx, ax ; add multipication to cx
-    mov bx, cx ; move to bx as it is default input source
-    jmp readInput
-; <-- INPUT -->
-
 ; <-- STACK -->
 pushToStack:
     cmp di, 0h ; if input is operator, go to reading
@@ -127,6 +84,50 @@ xorLastTwo:
     mov bx, 0h ; clear the registers
     jmp readInput
 ; <-- OPERATIONS -->
+
+; <-- INPUT -->
+readInput:
+    ; input reading interrupt
+    mov ah, 01h  
+    int 21h     
+    ; end of input reading (al is now input)
+    cmp al, 20h ; if operator / input is ended -> ' '
+        je pushToStack
+    cmp al, 2Bh ; if it is '+'
+        je addLastTwo
+    cmp al, 2Fh ; if it is '/'
+        je divideLastTwo
+    cmp al, 2Ah ; if it is '*'
+        je multiplyLastTwo
+    cmp al, 26h ; if it is '&'
+        je andLastTwo
+    cmp al, 7Ch ; if it is '|'
+        je orLastTwo
+    cmp al, 5Eh ; if it is '^'
+        je xorLastTwo
+    cmp al, 0Dh ; if input is ended completely -> '\n'(enter)
+        je output
+    mov di, 01h ; this is like else (input is not one of the operators)
+    cmp al, 3ah ; 3ah is the first ascii char after numbers
+        jg inputToNumber ; jg because if it is bigger than 3ah, it is a number
+    sub al, '0'  ; convert ascii to mathematical number
+    jmp multiDigitNumber ; number is like '123'
+
+inputToNumber: ; this part is from PS
+    sub al, "A"
+    add al, 10d
+    jmp multiDigitNumber
+
+multiDigitNumber: ; this part is from PS
+    mov cx, 0h
+    mov cl, al ; cl is the first digit
+    mov ax, 10h ; ax = 10h because mul uses ax
+    mul bx ; if there is first digit, multiply it with 10 ; else it results in 0
+    add cx, ax ; add multipication to cx
+    mov bx, cx ; move to bx as it is default input source
+    jmp readInput
+; <-- INPUT -->
+
 
 ; <-- OUTPUT -->
 output: ; this is also from PS
