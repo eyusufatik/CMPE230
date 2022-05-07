@@ -1,3 +1,5 @@
+;    Authors: Esad Yusuf Atik, Orkun Mahir Kılıç
+
 ;    Algorithm for evaluating a postfix expresdion:
 ;    1. Create a stack.
 ;    2. Scan the input starting from left.
@@ -5,8 +7,6 @@
 ;    4. If input is operator, pop last two from stack and evaluate with operator.
 ;
 ;    Source: https://www.geeksforgeeks.org/stack-set-4-evaluation-postfix-expresdion/
-
-;    Authors: Esad Yusuf Atik, Orkun Mahir Kılıç
 
 ; ORDER OF LABELS (It is important as a86 gives error if you jump > 128)
 ; code segment -> initialization
@@ -21,7 +21,7 @@ code segment ; initialize all registers, di is used to determine input's type
     mov bx, 0H
     mov cx, 0H
     mov dx, 0H
-    mov di, 0H   
+    mov di, 0H
     mov si, 0H
     jmp readInput
 
@@ -121,8 +121,7 @@ readInput:
     jmp multiDigitNumber ; number is like '123'
 
 inputToNumber: ; this part is from PS
-    sub al, "A"
-    add al, 10D
+    sub al, 55D; subtract 55D to get the number (TODO: CHECK IF THIS IS CORRECT) 
     jmp multiDigitNumber
 
 multiDigitNumber: ; this part is from PS
@@ -176,8 +175,7 @@ outputContinue:
     int 20H ; end interrupt
 
 hexToOutput: ; hex to ascii; this is from PS
-    sub dl, 10D
-    add dl, "A"
+    add dl, 55D ; add 55D to get the number (TODO: CHECK IF THIS IS CORRECT)
     jmp outputContinue
 ; <-- OUTPUT -->
 
