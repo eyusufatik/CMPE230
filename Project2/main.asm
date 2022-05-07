@@ -8,6 +8,13 @@
 
 ;    Authors: Esad Yusuf Atik, Orkun Mahir Kılıç
 
+; ORDER OF LABELS (It is important as a86 gives error if you jump > 128)
+; code segment -> initialization
+; stack operation
+; operator operations
+; input operations
+; output operations
+
 
 code segment ; initialize all registers, di is used to determine input's type
     mov ax, 0h
