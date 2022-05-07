@@ -16,7 +16,7 @@
 ; output operations
 
 
-code segment ; initialize all registers, di is used to determine input's type
+code segment ; initialize all registers, di is used to determine input's type, si is used to count output digits
     mov ax, 0H
     mov bx, 0H
     mov cx, 0H
@@ -144,21 +144,17 @@ output: ; this is also from PS
     ; end of output interrupt
     pop ax ; start popping the results
     mov bx, 10H ; div uses bx
-    mov si, 0H
+    mov si, 4H
     mov dx, 0H ; clear the registers
     div bx ; remainder is in dx now, it is the last digit
     push dx ; push to output later
-    add si, 1H ; cx is used for counting the digits in the stack
     mov dx, 0H ; clear the remainder (todo:: think about removing)
     div bx ; next digit is in remainder now
     push dx
-    add si, 1H ; count the digits
     mov dx, 0H
     div bx ; next digit is in remainder now
     push dx
-    add si, 1H ; count the digits
-    push ax ; this must be the last digit, push it
-    add si, 1H ; count the digits
+    push ax ; this must be the last digit, push
     jmp outputFinish
 
 outputFinish:
