@@ -136,13 +136,13 @@ prepareOutput: ; this is also from PS
     ; end of output interrupt
     pop ax ; start popping the results
     mov bx, 10H ; div uses bx
-    mov dx, 0H
+    mov dx, 0H ; clear dx
     div bx ; remainder is in dx now, it is the last digit
     push dx ; push to output later
-    mov dx, 0H
+    mov dx, 0H ; clear dx
     div bx ; next digit is in remainder now
     push dx
-    mov dx, 0H
+    mov dx, 0H ; clear dx
     div bx ; next digit is in remainder now
     push dx
     push ax ; this must be the last digit, push
@@ -162,7 +162,7 @@ outputContinue:
     int 20H ; end interrupt
 
 hexToOutput: ; this is from PS
-    add dl, 37H ; add 55D to get the number
+    add dl, 37H ; add 37H to get the number
     jmp outputContinue
 ; <-- OUTPUT -->
 
