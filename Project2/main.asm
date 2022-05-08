@@ -22,7 +22,7 @@ code segment ; initialize all registers, di is used to determine input's type, s
     mov cx, 0H
     mov dx, 0H
     mov di, 0H
-    mov si, 0H
+    mov si, 4H ; number of digits to output
     jmp readInput
 
 ; <-- STACK -->
@@ -40,9 +40,7 @@ addLastTwo:
     pop bx
     add ax, bx
     push ax ; push the result
-    mov di, 0H
-    mov bx, 0H ; clear the registers
-    jmp readInput
+    jmp goBackToReadInput
 
 divideLastTwo:
     pop bx 
@@ -50,9 +48,7 @@ divideLastTwo:
     mov dx, 0H
     div bx ; div -> al(ax) = ax / bx
     push ax ; push the result
-    mov di, 0H
-    mov bx, 0H ; clear the registers
-    jmp readInput
+    jmp goBackToReadInput
 
 multiplyLastTwo:
     pop ax 
@@ -60,39 +56,36 @@ multiplyLastTwo:
     mov dx, 0H
     mul bx ; mul -> ax = al(ax) * bx
     push ax ; push the result
-    mov di, 0H
-    mov bx, 0H ; clear the registers
-    jmp readInput
+    jmp goBackToReadInput
 
 andLastTwo:
     pop ax 
     pop bx 
     and ax, bx
     push ax ; push the result
-    mov di, 0H
-    mov bx, 0H ; clear the registers
-    jmp readInput
+    jmp goBackToReadInput
 
 orLastTwo:
     pop ax 
     pop bx 
     or ax, bx
     push ax ; push the result
-    mov di, 0H
-    mov bx, 0H ; clear the registers
-    jmp readInput
+    jmp goBackToReadInput
 
 xorLastTwo:
     pop ax 
     pop bx 
     xor ax, bx
     push ax ; push the result
-    mov di, 0H
-    mov bx, 0H ; clear the registers
-    jmp readInput
+    jmp goBackToReadInput
 ; <-- OPERATIONS -->
 
 ; <-- INPUT -->
+goBackToReadInput:
+    mov di, 0H
+    mov bx, 0H ; clear the registers
+    jmp readInput
+
 readInput:
     ; input reading interrupt
     mov ah, 01H  
@@ -121,7 +114,7 @@ readInput:
     jmp multiDigitNumber ; number is like '123'
 
 inputToNumber: ; this part is from PS
-    sub al, 55D; subtract 55D to get the number (TODO: CHECK IF THIS IS CORRECT) 
+    sub al, 55D; subtract 55D to get the number
     jmp multiDigitNumber
 
 multiDigitNumber: ; this part is from PS
@@ -134,7 +127,6 @@ multiDigitNumber: ; this part is from PS
     jmp readInput
 ; <-- INPUT -->
 
-
 ; <-- OUTPUT -->
 prepareOutput: ; this is also from PS
     ; output interrupt
@@ -144,7 +136,6 @@ prepareOutput: ; this is also from PS
     ; end of output interrupt
     pop ax ; start popping the results
     mov bx, 10H ; div uses bx
-    mov si, 4H
     mov dx, 0H ; clear the registers
     div bx ; remainder is in dx now, it is the last digit
     push dx ; push to output later
@@ -171,7 +162,7 @@ outputContinue:
     int 20H ; end interrupt
 
 hexToOutput: ; hex to ascii; this is from PS
-    add dl, 55D ; add 55D to get the number (TODO: CHECK IF THIS IS CORRECT)
+    add dl, 55D ; add 55D to get the number
     jmp outputContinue
 ; <-- OUTPUT -->
 
