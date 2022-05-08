@@ -108,13 +108,13 @@ readInput:
     cmp al, 0DH ; if input is ended completely -> '\n'(enter)
         je prepareOutput
     mov di, 01H ; this is like else (input is not one of the operators)
-    cmp al, 3aH ; 3ah is the first ascii char after numbers
+    cmp al, 3AH ; 3ah is the first ascii char after numbers
         jg inputToNumber ; jg because if it is bigger than 3ah, it is a number
-    sub al, '0'  ; convert ascii to mathematical number
+    sub al, 30H  ; convert ascii to mathematical number
     jmp multiDigitNumber ; number is like '123'
 
 inputToNumber: ; this part is from PS
-    sub al, 55D; subtract 55D to get the number
+    sub al, 37H ; subtract 37H to get the number
     jmp multiDigitNumber
 
 multiDigitNumber: ; this part is from PS
@@ -136,13 +136,10 @@ prepareOutput: ; this is also from PS
     ; end of output interrupt
     pop ax ; start popping the results
     mov bx, 10H ; div uses bx
-    mov dx, 0H ; clear the registers
     div bx ; remainder is in dx now, it is the last digit
     push dx ; push to output later
-    mov dx, 0H ; clear the remainder (todo:: think about removing)
     div bx ; next digit is in remainder now
     push dx
-    mov dx, 0H
     div bx ; next digit is in remainder now
     push dx
     push ax ; this must be the last digit, push
@@ -153,7 +150,7 @@ output:
     pop dx ; this is the first digit
     cmp dl, 9H ; if it is not a number
         jg hexToOutput
-    add dl, '0'
+    add dl, 30H
 
 outputContinue:
     int 21H ; start interrupt
@@ -161,8 +158,8 @@ outputContinue:
     jnz output ; if there are still digits, go to outputContinue
     int 20H ; end interrupt
 
-hexToOutput: ; hex to ascii; this is from PS
-    add dl, 55D ; add 55D to get the number
+hexToOutput: ; this is from PS
+    add dl, 37H ; add 55D to get the number
     jmp outputContinue
 ; <-- OUTPUT -->
 
