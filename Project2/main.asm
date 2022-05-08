@@ -136,10 +136,13 @@ prepareOutput: ; this is also from PS
     ; end of output interrupt
     pop ax ; start popping the results
     mov bx, 10H ; div uses bx
+    mov dx, 0H
     div bx ; remainder is in dx now, it is the last digit
     push dx ; push to output later
+    mov dx, 0H
     div bx ; next digit is in remainder now
     push dx
+    mov dx, 0H
     div bx ; next digit is in remainder now
     push dx
     push ax ; this must be the last digit, push
