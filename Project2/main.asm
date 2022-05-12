@@ -1,12 +1,12 @@
 ;    Authors: Esad Yusuf Atik, Orkun Mahir Kılıç
 
-;    Algorithm for evaluating a postfix expresdion:
+;    Algorithm for evaluating a postfix expression:
 ;    1. Create a stack.
 ;    2. Scan the input starting from left.
 ;    3. If input is a hex number, push it to stack.
 ;    4. If input is operator, pop last two from stack and evaluate with operator.
 ;
-;    Source: https://www.geeksforgeeks.org/stack-set-4-evaluation-postfix-expresdion/
+;    Source: https://www.geeksforgeeks.org/stack-set-4-evaluation-postfix-expression/
 
 ; ORDER OF LABELS (It is important as a86 gives error if you jump > 128)
 ; code segment -> initialization
