@@ -1,11 +1,15 @@
-#include "logic.h"
 #include <QApplication>
+#include "Calculator.h"
 
 int main(int argc, char *argv[])
-{
-    QApplication a(argc, argv);
-    Calc w;
-    w.show();
+{   
+    int rc;
+    QApplication app(argc, argv);
 
-    return a.exec();
+    Calculator *calc = new Calculator;
+
+    calc->show();
+
+    rc = app.exec();
+    return (rc);
 }
