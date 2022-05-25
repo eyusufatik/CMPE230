@@ -943,6 +943,10 @@ moc_Calculator.cpp: Calculator.h \
 		/usr/local/lib/QtWidgets.framework/Headers/qwidget.h \
 		/usr/local/lib/QtWidgets.framework/Headers/QLineEdit \
 		/usr/local/lib/QtWidgets.framework/Headers/qlineedit.h \
+		/usr/local/lib/QtWidgets.framework/Headers/QLayout \
+		/usr/local/lib/QtWidgets.framework/Headers/qlayout.h \
+		/usr/local/lib/QtWidgets.framework/Headers/QGridLayout \
+		/usr/local/lib/QtWidgets.framework/Headers/qgridlayout.h \
 		Button.h \
 		/usr/local/lib/QtCore.framework/Headers/QSize \
 		/usr/local/lib/QtCore.framework/Headers/qsize.h \
@@ -982,6 +986,10 @@ Calculator.o: Calculator.cpp Calculator.h \
 		/usr/local/lib/QtWidgets.framework/Headers/qwidget.h \
 		/usr/local/lib/QtWidgets.framework/Headers/QLineEdit \
 		/usr/local/lib/QtWidgets.framework/Headers/qlineedit.h \
+		/usr/local/lib/QtWidgets.framework/Headers/QLayout \
+		/usr/local/lib/QtWidgets.framework/Headers/qlayout.h \
+		/usr/local/lib/QtWidgets.framework/Headers/QGridLayout \
+		/usr/local/lib/QtWidgets.framework/Headers/qgridlayout.h \
 		Button.h \
 		/usr/local/lib/QtCore.framework/Headers/QSize \
 		/usr/local/lib/QtCore.framework/Headers/qsize.h \
@@ -991,8 +999,20 @@ Calculator.o: Calculator.cpp Calculator.h \
 
 main.o: main.cpp /usr/local/lib/QtWidgets.framework/Headers/QApplication \
 		/usr/local/lib/QtWidgets.framework/Headers/qapplication.h \
-		/usr/local/lib/QtWidgets.framework/Headers/QLabel \
-		/usr/local/lib/QtWidgets.framework/Headers/qlabel.h
+		Calculator.h \
+		/usr/local/lib/QtWidgets.framework/Headers/QWidget \
+		/usr/local/lib/QtWidgets.framework/Headers/qwidget.h \
+		/usr/local/lib/QtWidgets.framework/Headers/QLineEdit \
+		/usr/local/lib/QtWidgets.framework/Headers/qlineedit.h \
+		/usr/local/lib/QtWidgets.framework/Headers/QLayout \
+		/usr/local/lib/QtWidgets.framework/Headers/qlayout.h \
+		/usr/local/lib/QtWidgets.framework/Headers/QGridLayout \
+		/usr/local/lib/QtWidgets.framework/Headers/qgridlayout.h \
+		Button.h \
+		/usr/local/lib/QtCore.framework/Headers/QSize \
+		/usr/local/lib/QtCore.framework/Headers/qsize.h \
+		/usr/local/lib/QtWidgets.framework/Headers/QToolButton \
+		/usr/local/lib/QtWidgets.framework/Headers/qtoolbutton.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o main.cpp
 
 moc_Button.o: moc_Button.cpp 
