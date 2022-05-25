@@ -9,9 +9,9 @@ Button *Calculator::createButton(const QString &text, const char *member)
 
 void Calculator::digitClicked()
 {
-    if (waitingEqual && display->text() != "" && display->text()[0] != '-')
-    {
+    if(rightAfterEqual && display->text() == ""){
         display->clear();
+        rightAfterEqual = false;
     }
 
     Button *clickedButton = qobject_cast<Button *>(sender());
@@ -128,6 +128,7 @@ void Calculator::equalClicked()
         calculate();
         queue.clear();
         waitingEqual = false;
+        rightAfterEqual = true;
     }
 }
 void Calculator::plusClicked()

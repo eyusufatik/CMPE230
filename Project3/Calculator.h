@@ -32,9 +32,7 @@ class Calculator : public QWidget
         Button *equalButton;
         Button *clearButton;
         bool waitingEqual = false;
-        long number1 = 0;
-        long number2 = 0;
-        std::string operand;
+        bool rightAfterEqual = false;
         std::vector<std::string> queue;
         long calculate();
         std::string signedLongToHexStr(long);
